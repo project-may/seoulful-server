@@ -9,4 +9,16 @@ export class PushController {
   async sendPushMessage(@Body() message: string): Promise<void> {
     await this.pushService.sendPushMessage(message);
   }
+
+  // 예약을 여러개 하려면?
+
+  @Post('/reserve-start')
+  async startSchedule(@Body() time: number): Promise<void> {
+    await this.pushService.startSchedule(time);
+  }
+
+  @Post('/reserve-stop')
+  async stopSchedule(@Body() message: string): Promise<void> {
+    await this.pushService.stopSchedule(message);
+  }
 }
