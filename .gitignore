@@ -1,6 +1,7 @@
 # compiled output
 /dist
 /node_modules
+.env
 
 # Logs
 logs
@@ -36,4 +37,4 @@ lerna-debug.log*
 
 # config
 src/common/config/firebase-config.json
-src/common/config/seoulmate-server-firebase-adminsdk-81k7v-d607a551e6.json
+src/common/config/firebase.config.json

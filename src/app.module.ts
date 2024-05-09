@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { PushModule } from './push/push.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
+    PushModule,
   ],
   controllers: [AppController],
   providers: [AppService],

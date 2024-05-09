@@ -4,17 +4,21 @@ import { Injectable } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
 import { msToCronExpression } from 'src/util/time.formatting.util';
+import { FirebaseService } from 'src/common/config/firebase.service';
 
 @Injectable()
 export class PushService {
   constructor(
     private http: HttpService,
     private schedulerRegistry: SchedulerRegistry,
+    private firebaseService: FirebaseService,
   ) {}
 
-  async sendPushMessage(pushDto: any): Promise<void> {
+  async sendPushMessage(pushDto: any): Promise<any> {
     try {
       console.log('hi');
+      const token = this.firebaseService.getFcmToken();
+      return { pushDto, token };
     } catch (error) {
       throw new HttpException(
         'Failed to send push notification',
