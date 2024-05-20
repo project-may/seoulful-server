@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as firebaseAdmin from 'firebase-admin';
-import * as firebaseConfig from './firebase.config.json';
+import { Injectable, Logger } from '@nestjs/common'
+import * as firebaseAdmin from 'firebase-admin'
+import * as firebaseConfig from './firebase.config.json'
 
 //import { initializeApp } from "firebase/app";
 
@@ -14,56 +14,48 @@ const firebase_params = {
   authUri: firebaseConfig.auth_uri,
   tokenUri: firebaseConfig.token_uri,
   authProviderX509CertUrl: firebaseConfig.auth_provider_x509_cert_url,
-  clientC509CertUrl: firebaseConfig.client_x509_cert_url,
-};
+  clientC509CertUrl: firebaseConfig.client_x509_cert_url
+}
 
 @Injectable()
 export class FirebaseService {
-  private readonly app: firebaseAdmin.app.App;
-  private readonly logger = new Logger(FirebaseService.name);
+  private readonly app: firebaseAdmin.app.App
+  private readonly logger = new Logger(FirebaseService.name)
 
   constructor() {
     if (firebaseAdmin.app.length === 0) {
       firebaseAdmin.initializeApp({
-        credential: firebaseAdmin.credential.cert(firebase_params),
-      });
+        credential: firebaseAdmin.credential.cert(firebase_params)
+      })
     }
   }
 
   private readonly options = {
     priority: 'high',
-    timeToLive: 60 * 60 * 24,
-  };
+    timeToLive: 60 * 60 * 24
+  }
 
   private readonly optionsSilent = {
     priority: 'high',
     timeToLive: 60 * 60 * 24,
-    content_available: true,
-  };
+    content_available: true
+  }
 
-  async sendNotification(
-    deviceIds: Array<string>,
-    payload: firebaseAdmin.messaging.MessagingPayload,
-    silent: boolean,
-  ) {
+  async sendNotification(deviceIds: Array<string>, payload: firebaseAdmin.messaging.MessagingPayload, silent: boolean) {
     if (deviceIds.length == 0) {
-      throw new Error('You provide an empty device ids list!');
+      throw new Error('You provide an empty device ids list!')
     }
 
-    let result = null;
+    let result = null
     try {
       result = await firebaseAdmin
         .messaging()
-        .sendToDevice(
-          deviceIds,
-          payload,
-          silent ? this.optionsSilent : this.options,
-        );
+        .sendToDevice(deviceIds, payload, silent ? this.optionsSilent : this.options)
     } catch (error) {
-      this.logger.error(error.message, error.stackTrace, 'fcm-nestjs');
-      throw error;
+      this.logger.error(error.message, error.stackTrace, 'fcm-nestjs')
+      throw error
     }
-    return result;
+    return result
   }
 
   /**
@@ -73,29 +65,19 @@ export class FirebaseService {
    * @param silent
    * @returns
    */
-  async sendToTopic(
-    topic: 'all' | string,
-    payload: firebaseAdmin.messaging.MessagingPayload,
-    silent: boolean,
-  ) {
+  async sendToTopic(topic: 'all' | string, payload: firebaseAdmin.messaging.MessagingPayload, silent: boolean) {
     if (!topic && topic.trim().length === 0) {
-      throw new Error('You provide an empty topic name!');
+      throw new Error('You provide an empty topic name!')
     }
 
-    let result = null;
+    let result = null
     try {
-      result = await firebaseAdmin
-        .messaging()
-        .sendToTopic(
-          topic,
-          payload,
-          silent ? this.optionsSilent : this.options,
-        );
+      result = await firebaseAdmin.messaging().sendToTopic(topic, payload, silent ? this.optionsSilent : this.options)
     } catch (error) {
-      this.logger.error(error.message, error.stackTrace, 'fcm-nestjs');
-      throw error;
+      this.logger.error(error.message, error.stackTrace, 'fcm-nestjs')
+      throw error
     }
-    return result;
+    return result
   }
 
   //   async getFcmToken() {
