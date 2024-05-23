@@ -1,10 +1,10 @@
-import { HttpException, HttpStatus } from '@nestjs/common'
+// import { HttpException, HttpStatus } from '@nestjs/common'
 import { HttpService } from '@nestjs/axios'
 import { Injectable } from '@nestjs/common'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { CronJob } from 'cron'
-import { msToCronExpression } from 'src/util/time.formatting.util'
-import { FirebaseService } from 'src/common/config/firebase.service'
+import { msToCronExpression } from '@/util/time.formatting.util'
+import { FirebaseService } from '@/common/config/firebase.service'
 
 @Injectable()
 export class PushService {
@@ -15,15 +15,15 @@ export class PushService {
   ) {}
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async sendPushMessage(pushDto: any): Promise<any> {
-    try {
-      console.log('hi')
-      const token = this.firebaseService.getFcmToken()
-      return { pushDto, token }
-    } catch (error) {
-      throw new HttpException('Failed to send push notification', HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  }
+  // async sendPushMessage(pushDto: any): Promise<any> {
+  //   try {
+  //     console.log('hi')
+  //     const token = this.firebaseService.getFcmToken()
+  //     return { pushDto, token }
+  //   } catch (error) {
+  //     throw new HttpException('Failed to send push notification', HttpStatus.INTERNAL_SERVER_ERROR)
+  //   }
+  // }
 
   async startSchedule(time: number): Promise<{ time: number }> {
     const name = 'cronjob'
