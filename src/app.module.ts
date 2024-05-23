@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
 import { ConfigModule } from '@nestjs/config'
 import { ScheduleModule } from '@nestjs/schedule'
-import { PushModule } from './push/push.module'
+import { AppController } from '@/app.controller'
+import { AppService } from '@/app.service'
+import { PushModule } from '@/push/push.module'
 
 @Module({
   imports: [

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import * as firebaseAdmin from 'firebase-admin'
-import * as firebaseConfig from './firebase.config.json'
+import * as firebaseConfig from '@/common/config/firebase.config.json'
 
 //import { initializeApp } from "firebase/app";
 

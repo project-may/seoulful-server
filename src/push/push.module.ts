@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
-import { PushService } from './push.service'
-import { PushController } from './push.controller'
-import { HttpModule } from '@nestjs/axios'
-import { FirebaseService } from 'src/common/config/firebase.service'
 import { SchedulerRegistry } from '@nestjs/schedule'
+import { HttpModule } from '@nestjs/axios'
+import { PushService } from '@/push/push.service'
+import { PushController } from '@/push/push.controller'
+import { FirebaseService } from '@/common/config/firebase.service'
 
 @Module({
   imports: [HttpModule],
