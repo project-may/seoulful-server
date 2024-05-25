@@ -15,7 +15,7 @@ import { EventsModule } from '@/events/events.module'
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (env: ConfigService) => ({
-        uri: env.get<string>('MONGO_URI')
+        uri: env.get<string>('MONGO_URI_PRODUCTION')
       }),
       inject: [ConfigService]
     }),
