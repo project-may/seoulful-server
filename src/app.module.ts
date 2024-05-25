@@ -13,8 +13,8 @@ import { PushModule } from '@/push/push.module'
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_URI')
+      useFactory: (env: ConfigService) => ({
+        uri: env.get<string>('MONGO_URI')
       }),
       inject: [ConfigService]
     }),
