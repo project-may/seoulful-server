@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Events } from '@/schema/events.schema'
-import { EventDTO, EventListResponseDTO, EventDetailResponseDTO, IEventData } from '@/dto/events.dto'
-import type { EventsModel } from '@/dto/events.dto'
+import { EventDTO, EventListResponseDTO, EventDetailResponseDTO, IEventData } from '@/events/events.dto'
+import type { EventsModel } from '@/events/events.dto'
 
 @Injectable()
 export class EventsService {
