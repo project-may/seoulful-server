@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { AppController } from '@/app.controller'
 import { AppService } from '@/app.service'
 import { PushModule } from '@/push/push.module'
+import { EventsModule } from '@/events/events.module'
 
 @Module({
   imports: [
@@ -14,12 +15,13 @@ import { PushModule } from '@/push/push.module'
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (env: ConfigService) => ({
-        uri: env.get<string>('MONGO_URI')
+        uri: env.get<string>('MONGO_URI_PRODUCTION')
       }),
       inject: [ConfigService]
     }),
     ScheduleModule.forRoot(),
-    PushModule
+    PushModule,
+    EventsModule
   ],
   controllers: [AppController],
   providers: [AppService]
