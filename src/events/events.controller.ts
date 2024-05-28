@@ -1,53 +1,34 @@
-import { Controller, Get, HttpCode, HttpException, HttpStatus, Param, Query } from '@nestjs/common'
+import { Controller, Get, HttpCode, HttpStatus, Param, Query, UseFilters } from '@nestjs/common'
 import { EventsService } from '@/events/events.service'
+import { HttpExceptionFilter } from '@/common/filters/http-exception.filter'
 
 @Controller('event')
+@UseFilters(HttpExceptionFilter)
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Get('/list')
   @HttpCode(HttpStatus.OK)
-  async getEventList(@Query('limit') limit: string, @Query('offset') offset: string) {
-    try {
-      const result = await this.eventsService.getEventList(limit, offset)
-      return result
-    } catch (err: unknown) {
-      if (!(err instanceof HttpException)) {
-        throw new HttpException({ message: 'Unknown Error', error: err }, HttpStatus.INTERNAL_SERVER_ERROR)
-      }
-      throw err
-    }
+  getEventList(@Query('limit') limit: string, @Query('offset') offset: string) {
+    const result = this.eventsService.getEventList(limit, offset)
+    return result
   }
 
   @Get('/list/:categorySeq')
   @HttpCode(HttpStatus.OK)
-  async getEventListByCategory(
+  getEventListByCategory(
     @Param('categorySeq') categorySeq: string,
     @Query('limit') limit: string,
     @Query('offset') offset: string
   ) {
-    try {
-      const result = await this.eventsService.getEventsByCategory(categorySeq, limit, offset)
-      return result
-    } catch (err: unknown) {
-      if (!(err instanceof HttpException)) {
-        throw new HttpException({ message: 'Unknown Error', error: err }, HttpStatus.INTERNAL_SERVER_ERROR)
-      }
-      throw err
-    }
+    const result = this.eventsService.getEventsByCategory(categorySeq, limit, offset)
+    return result
   }
 
   @Get('/:eventId')
   @HttpCode(HttpStatus.OK)
-  async getEventDetail(@Param('eventId') eventId: string) {
-    try {
-      const result = await this.eventsService.getEventDetail(eventId)
-      return result
-    } catch (err: unknown) {
-      if (!(err instanceof HttpException)) {
-        throw new HttpException({ message: 'Unknown Error', error: err }, HttpStatus.INTERNAL_SERVER_ERROR)
-      }
-      throw err
-    }
+  getEventDetail(@Param('eventId') eventId: string) {
+    const result = this.eventsService.getEventDetail(eventId)
+    return result
   }
 }
