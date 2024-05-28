@@ -1,8 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import {
+  HttpException,
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException
+} from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Events } from '@/schema/events.schema'
-import { EventDTO, EventListResponseDTO, EventDetailResponseDTO, IEventData } from '@/events/events.dto'
-import type { EventsModel } from '@/events/events.dto'
+import { EventDTO, EventListResponseDTO, EventDetailResponseDTO } from '@/events/events.dto'
+import type { EventsModel, IEventData } from '@/events/types/events.type'
 
 @Injectable()
 export class EventsService {
@@ -10,11 +16,11 @@ export class EventsService {
 
   async getEventList(limit: string, offset: string) {
     try {
-      if (!limit || !offset) throw new HttpException('limit 또는 offset 값이 없습니다.', HttpStatus.BAD_REQUEST)
+      if (!limit || !offset) throw new BadRequestException('limit 또는 offset 값이 없습니다.')
       if (Number.isNaN(Number(limit)) || Number.isNaN(Number(offset)))
-        throw new HttpException('유효하지 않은 값입니다.', HttpStatus.BAD_REQUEST)
+        throw new BadRequestException('유효하지 않은 limit 혹은 offset 값입니다.')
 
-      const eventListData = (await this.eventsModel
+      const eventListData: IEventData[] = await this.eventsModel
         .find(
           {},
           {
@@ -31,7 +37,7 @@ export class EventsService {
         )
         .limit(Number(limit))
         .skip(Number(offset))
-        .exec()) as IEventData[]
+        .exec()
 
       const totalData = await this.eventsModel.countDocuments().exec()
       const resultData = eventListData.map((data) => new EventDTO(data))
@@ -39,58 +45,49 @@ export class EventsService {
 
       return result
     } catch (err) {
-      if (err instanceof HttpException) {
-        throw new HttpException({ status: err.getStatus(), message: err.getResponse() }, err.getStatus())
-      }
-      throw new HttpException({ message: 'Internal Server Error', error: err }, HttpStatus.INTERNAL_SERVER_ERROR)
+      if (err instanceof HttpException) throw err
+      else throw new InternalServerErrorException(err)
     }
   }
 
   async getEventsByCategory(categorySeq: string, limit: string, offset: string) {
     try {
       if (categorySeq == null || Number.isNaN(Number(categorySeq)))
-        throw new HttpException('유효하지 않은 카테고리 입니다.', HttpStatus.BAD_REQUEST)
-      if (!limit || !offset) throw new HttpException('limit 또는 offset 값이 없습니다.', HttpStatus.BAD_REQUEST)
+        throw new BadRequestException('유효하지 않은 카테고리 입니다.')
+      if (!limit || !offset) throw new BadRequestException('limit 또는 offset 값이 없습니다.')
       if (Number.isNaN(Number(limit)) || Number.isNaN(Number(offset)))
-        throw new HttpException('유효하지 않은 limit 혹은 offset 값입니다.', HttpStatus.BAD_REQUEST)
+        throw new BadRequestException('유효하지 않은 limit 혹은 offset 값입니다.')
 
-      const eventsListData = (await this.eventsModel
+      const eventsListData: IEventData[] = await this.eventsModel
         .find({ category_seq: categorySeq })
         .limit(Number(limit))
         .skip(Number(offset))
-        .exec()) as IEventData[]
+        .exec()
       const totalData = await this.eventsModel.countDocuments({ category_seq: categorySeq }).exec()
       const resultData = eventsListData.map((data) => new EventDTO(data))
       const result = new EventListResponseDTO(resultData, totalData)
 
       return result
     } catch (err) {
-      if (err instanceof HttpException) {
-        throw new HttpException({ status: err.getStatus(), message: err.getResponse() }, err.getStatus())
-      }
-      throw new HttpException({ message: 'Internal Server Error', error: err }, HttpStatus.INTERNAL_SERVER_ERROR)
+      if (err instanceof HttpException) throw err
+      else throw new InternalServerErrorException(err)
     }
   }
 
   async getEventDetail(eventId: string) {
     try {
-      if (Number.isNaN(Number(eventId))) {
-        throw new HttpException('유효하지 eventSeq입니다.', HttpStatus.BAD_REQUEST)
-      }
+      if (Number.isNaN(Number(eventId))) throw new BadRequestException('유효하지 eventSeq입니다.')
 
-      const eventDetailData = (await this.eventsModel.findOne({ event_id: Number(eventId) }).exec()) as IEventData
-      if (!eventDetailData) {
-        throw new HttpException('존재하지 않는 행사입니다.', HttpStatus.NOT_FOUND)
-      }
+      const eventDetailData: IEventData = await this.eventsModel.findOne({ event_id: Number(eventId) }).exec()
+      if (!eventDetailData) throw new NotFoundException('존재하지 않는 행사입니다.')
 
       const detailData = new EventDTO(eventDetailData)
       const result = new EventDetailResponseDTO(detailData)
+
       return result
     } catch (err) {
-      if (err instanceof HttpException) {
-        throw new HttpException({ status: err.getStatus(), message: err.getResponse() }, err.getStatus())
-      }
-      throw new HttpException({ message: 'Internal Server Error', error: err }, HttpStatus.INTERNAL_SERVER_ERROR)
+      if (err instanceof HttpException) throw err
+      else throw new InternalServerErrorException(err)
     }
   }
 }
