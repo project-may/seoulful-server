@@ -19,7 +19,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter'
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (env: ConfigService) => ({
-        uri: env.get<string>('MONGO_URI_LOCAL')
+        uri: env.get<string>('MONGO_URI_PRODUCTION')
       }),
       inject: [ConfigService]
     }),
