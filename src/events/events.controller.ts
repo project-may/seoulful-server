@@ -9,23 +9,40 @@ export class EventsController {
 
   @Get('/list')
   @HttpCode(HttpStatus.OK)
-  getEventList(@Query('limit') limit: string, @Query('offset') offset: string) {
-    const result = this.eventsService.getEventList(limit, offset)
-    return result
-  }
-
-  @Get('/list/:categorySeq')
-  @HttpCode(HttpStatus.OK)
-  getEventListByCategory(
-    @Param('categorySeq') categorySeq: string,
+  getEventList(
     @Query('limit') limit: string,
-    @Query('offset') offset: string
+    @Query('offset') offset: string,
+    @Query('categorySeq') categorySeq?: string
   ) {
-    const result = this.eventsService.getEventsByCategory(categorySeq, limit, offset)
+    const result = this.eventsService.getEventList(limit, offset, categorySeq)
     return result
   }
 
-  @Get('/:eventId')
+  @Get('/list/search')
+  @HttpCode(HttpStatus.OK)
+  getEventListBySearch(
+    @Query('limit') limit: string,
+    @Query('offset') offset: string,
+    @Query('eventName') eventName: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Query('categorySeq') categorySeq?: number,
+    @Query('guSeq') guSeq?: number
+  ) {
+    const result = this.eventsService.getEventListBySearch(
+      limit,
+      offset,
+      eventName,
+      startDate,
+      endDate,
+      categorySeq,
+      guSeq
+    )
+
+    return result
+  }
+
+  @Get('/detail/:eventId')
   @HttpCode(HttpStatus.OK)
   getEventDetail(@Param('eventId') eventId: string) {
     const result = this.eventsService.getEventDetail(eventId)
