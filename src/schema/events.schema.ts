@@ -48,17 +48,17 @@ export class Events extends Document {
   @Prop({ type: String, required: true })
   main_img: string
 
-  @Prop({ type: Date, required: true })
-  reg_date: Date
+  @Prop({ type: String, required: true })
+  reg_date: string
 
   @Prop({ type: Boolean, required: true })
   is_public: boolean
 
-  @Prop({ type: Date, required: true })
-  start_date: Date
+  @Prop({ type: String, required: true })
+  start_date: string
 
-  @Prop({ type: Date, required: true })
-  end_date: Date
+  @Prop({ type: String, required: true })
+  end_date: string
 
   @Prop({ type: String, default: null })
   theme: string | null
