@@ -7,7 +7,7 @@ export class AuthController {
 
   @Post('/login/:provider')
   @HttpCode(HttpStatus.OK)
-  async getToken(@Param('provider') provider: string, @Body() requestBody: { code: string }) {
+  async getToken(@Param('provider') provider: 'kakao' | 'google' | 'naver', @Body() requestBody: { code: string }) {
     if (provider === 'kakao') {
       const accessToken = await this.authService.getKakaoToken(requestBody)
       const userInfo = await this.authService.getKakaoUserInfo(accessToken)
