@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import axios, { isAxiosError } from 'axios'
-import type { KakaoTokenResponse, KakaoUserInfoResponse } from './types/auth-kakao.types'
+import type { KakaoTokenResponse, KakaoUserInfoResponse } from '@/auth/types/auth-kakao.types'
 
 @Injectable()
 export class AuthService {
@@ -36,7 +36,7 @@ export class AuthService {
     const accessToken = `Bearer ${token}`
     const headers = {
       Authorization: accessToken,
-      'Contnent-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+      'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
     }
     const propertyKeys = ['kakao_account.email', 'kakao_account.profile', 'kakao_account.name']
     const queryString = `property_keys=${JSON.stringify(propertyKeys)}`
