@@ -12,13 +12,13 @@ export interface KakaoUserInfoResponse {
   id: number
   connected_at: Date
   kakao_account: {
-    profile_naicname_needs_agreement: boolean
+    profile_nickname_needs_agreement: boolean
     profile_image_needs_agreement: boolean
     profile: {
       nickname: string
       thumbnail_image_url: string
       profile_image_url: string
-      is_defualt_image: boolean
+      is_default_image: boolean
       is_default_nickname: boolean
     }
     has_email: boolean
