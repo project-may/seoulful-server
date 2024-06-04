@@ -1,13 +1,98 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
 import { ConfigService } from '@nestjs/config'
 import axios, { isAxiosError } from 'axios'
+import { User, UserModel } from '@/schema/user.schema'
+import { UserDTO, UserResponseDTO } from '@/auth/user.dto'
 import type { KakaoTokenResponse, KakaoUserInfoResponse } from '@/auth/types/auth-kakao.types'
+import type { NaverTokenResponse, NaverUserInfoResponse } from '@/auth/types/auth-naver.types'
+import type { IUserData } from '@/auth/types/user.types'
 
 @Injectable()
 export class AuthService {
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    @InjectModel(User.name) private readonly userModel: UserModel
+  ) {}
+
+  async saveUser(
+    user: KakaoUserInfoResponse | NaverUserInfoResponse,
+    accessToken: string,
+    refreshToken: string
+  ): Promise<IUserData> {
+    if ('kakao_account' in user) {
+      const userDataFromKakao = {
+        user_id: String(user.id),
+        login_method: 'kakao',
+        nickname: user.kakao_account.profile.nickname,
+        email: user.kakao_account.email,
+        profile_img: user.kakao_account.profile.profile_image_url,
+        access_token: accessToken,
+        refresh_token: refreshToken
+      }
+      const newUser = new this.userModel(userDataFromKakao)
+      await newUser.save()
+      const savedKakaoUser: IUserData = await this.userModel.findOne({
+        user_id: String(user.id),
+        login_method: 'kakao'
+      })
+      return savedKakaoUser
+    } else {
+      const userDataFromNaver = {
+        user_id: user.response.id,
+        login_method: 'naver',
+        nickname: user.response.nickname,
+        email: user.response.email,
+        profile_img: user.response.profile_image,
+        access_token: accessToken,
+        refresh_token: refreshToken
+      }
+      const newUser = new this.userModel(userDataFromNaver)
+      await newUser.save()
+      const savedNaverUser: IUserData = await this.userModel.findOne({
+        user_id: user.response.id,
+        login_method: 'naver'
+      })
+      return savedNaverUser
+    }
+  }
+
+  async checkAndSaveUser(
+    user: KakaoUserInfoResponse | NaverUserInfoResponse,
+    accessToken: string,
+    refreshToken: string
+  ) {
+    if ('kakao_account' in user) {
+      const userData: IUserData = await this.userModel.findOne({ user_id: String(user.id) })
+      if (!userData) {
+        const resultData = await this.saveUser(user, accessToken, refreshToken)
+        const userDto = new UserDTO(resultData)
+        const result = new UserResponseDTO(userDto)
+        return result
+      } else {
+        const userDto = new UserDTO(userData)
+        const result = new UserResponseDTO(userDto)
+        return result
+      }
+    } else {
+      const userData: IUserData = await this.userModel.findOne({ user_id: user.response.id })
+      if (!userData) {
+        const resultData: IUserData = await this.saveUser(user, accessToken, refreshToken)
+        const userDto = new UserDTO(resultData)
+        const result = new UserResponseDTO(userDto)
+        return result
+      } else {
+        const userDto = new UserDTO(userData)
+        const result = new UserResponseDTO(userDto)
+        return result
+      }
+    }
+  }
 
   async getKakaoToken(requestBody: { code: string }) {
+    if (!requestBody.code) {
+      throw new BadRequestException('code 값이 없습니다.')
+    }
     const kakaoTokenUrl = 'https://kauth.kakao.com/oauth/token'
     const clientId = this.configService.get<string>('KAKAO_API_KEY')
     const authCode = requestBody.code
@@ -22,16 +107,19 @@ export class AuthService {
       const { data } = await axios.post<KakaoTokenResponse>(kakaoTokenUrl, payload, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' }
       })
-      console.log('when Success Token', data)
-      return data.access_token
+      return data
     } catch (err) {
       if (isAxiosError(err)) {
-        console.log('when Error Token', err.response.data)
+        if (err.response.status === 400) {
+          throw new BadRequestException(err.response.data.error_description)
+        }
+        throw new InternalServerErrorException(err.response.data)
       }
     }
   }
 
   async getKakaoUserInfo(token: string) {
+    if (!token) throw new BadRequestException('token 값이 없습니다.')
     const kakaoUserInfoUrl = 'https://kapi.kakao.com/v2/user/me'
     const accessToken = `Bearer ${token}`
     const headers = {
@@ -42,12 +130,62 @@ export class AuthService {
     const queryString = `property_keys=${JSON.stringify(propertyKeys)}`
     try {
       const { data } = await axios.get<KakaoUserInfoResponse>(`${kakaoUserInfoUrl}?${queryString}`, { headers })
-      console.log('when Success UserInfo', data)
-
       return data
     } catch (err) {
       if (isAxiosError(err)) {
-        console.log('when Error UserInfo', err.response.data)
+        if (err.response.status === 401) {
+          throw new UnauthorizedException(err.response.data)
+        }
+        throw new InternalServerErrorException(err.response.data)
+      }
+    }
+  }
+
+  async getNaverToken(requestBody: { code: string; state: string }) {
+    if (!requestBody.code || !requestBody.state) throw new BadRequestException('code 또는 state 값이 없습니다.')
+
+    const naverTokenUrl = 'https://nid.naver.com/oauth2.0/token'
+
+    const clientId = this.configService.get<string>('NAVER_CLIENT_ID')
+    const secretKey = this.configService.get<string>('NAVER_SECRET_KEY')
+    const authCode = requestBody.code
+    const state = requestBody.state
+
+    const params = {
+      grant_type: 'authorization_code',
+      client_id: clientId,
+      client_secret: secretKey,
+      code: authCode,
+      state: encodeURI(state)
+    }
+
+    try {
+      const { data } = await axios.get<NaverTokenResponse>(`${naverTokenUrl}`, { params })
+      return data
+    } catch (err) {
+      if (isAxiosError(err)) {
+        throw new InternalServerErrorException(err.response.data)
+      }
+    }
+  }
+
+  async getNaverUserInfo(accessToken: string) {
+    if (!accessToken) throw new BadRequestException('accessToken 값이 없습니다.')
+
+    const naverUserInfoUrl = 'https://openapi.naver.com/v1/nid/me'
+    const headers = {
+      Authorization: `Bearer ${accessToken}`
+    }
+
+    try {
+      const { data } = await axios.get<NaverUserInfoResponse>(naverUserInfoUrl, { headers })
+      return data
+    } catch (err) {
+      if (isAxiosError(err)) {
+        if (err.response.status === 401) {
+          throw new UnauthorizedException(err.response.data)
+        }
+        throw new InternalServerErrorException(err.response.data)
       }
     }
   }
