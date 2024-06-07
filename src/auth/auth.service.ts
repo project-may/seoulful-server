@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { ConfigService } from '@nestjs/config'
 import axios, { isAxiosError } from 'axios'
@@ -187,6 +193,31 @@ export class AuthService {
         }
         throw new InternalServerErrorException(err.response.data)
       }
+    }
+  }
+
+  async getUserDetail(userId: string, provider: 'kakao' | 'naver') {
+    if (!provider || (provider !== 'kakao' && provider !== 'naver')) {
+      throw new BadRequestException('유효하지 않은 로그인 수단입니다.')
+    }
+
+    if (!userId || !userId.trim()) {
+      throw new BadRequestException('userId 값이 없습니다.')
+    }
+
+    try {
+      const userData: IUserData = await this.userModel.findOne({ user_id: userId, login_method: provider })
+
+      if (!userData) {
+        throw new NotFoundException('유저 정보를 찾을 수 없습니다.')
+      }
+
+      const userDto = new UserDTO(userData)
+      const result = new UserResponseDTO(userDto)
+
+      return result
+    } catch (err) {
+      throw new InternalServerErrorException(err)
     }
   }
 }
