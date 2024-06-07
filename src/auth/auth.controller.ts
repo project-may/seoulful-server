@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, HttpCode, HttpStatus, Param, Post } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common'
 import { AuthService } from '@/auth/auth.service'
 
 @Controller('auth')
@@ -21,6 +21,12 @@ export class AuthController {
       return result
     }
     throw new BadRequestException('Invalid provider')
+  }
+
+  @Get('/user/:userId')
+  @HttpCode(HttpStatus.OK)
+  getUserDetail(@Param('userId') userId: string, @Query('provider') provider: 'kakao' | 'naver') {
+    return this.authService.getUserDetail(userId, provider)
   }
 
   // TODO: Logout 각 api별로 구현해야함
