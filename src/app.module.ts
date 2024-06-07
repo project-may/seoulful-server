@@ -6,6 +6,7 @@ import { AppController } from '@/app.controller'
 import { AppService } from '@/app.service'
 import { PushModule } from '@/push/push.module'
 import { EventsModule } from '@/events/events.module'
+import { AuthModule } from '@/auth/auth.module'
 import { Log, LogSchema } from '@/schema/logs.schema'
 import { LoggingMiddleware } from '@/middleware/loggin.middleware'
 import { APP_FILTER } from '@nestjs/core'
@@ -26,7 +27,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter'
     MongooseModule.forFeature([{ name: Log.name, schema: LogSchema }]),
     ScheduleModule.forRoot(),
     PushModule,
-    EventsModule
+    EventsModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_FILTER, useClass: HttpExceptionFilter }]
