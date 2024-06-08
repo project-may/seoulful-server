@@ -1,10 +1,8 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import { ScheduleModule } from '@nestjs/schedule'
 import { AppController } from '@/app.controller'
 import { AppService } from '@/app.service'
-import { PushModule } from '@/push/push.module'
 import { EventsModule } from '@/events/events.module'
 import { AuthModule } from '@/auth/auth.module'
 import { Log, LogSchema } from '@/schema/logs.schema'
@@ -25,8 +23,6 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter'
       inject: [ConfigService]
     }),
     MongooseModule.forFeature([{ name: Log.name, schema: LogSchema }]),
-    ScheduleModule.forRoot(),
-    PushModule,
     EventsModule,
     AuthModule
   ],
