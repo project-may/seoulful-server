@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 node:20.11.0-alpine AS base
+FROM --platform=linux/amd64 node:20.11.0-alpine AS base
 
 # 패키지 업데이트 및 Python3, g++, make 설치
 RUN apk update && apk add --no-cache python3 g++ make
