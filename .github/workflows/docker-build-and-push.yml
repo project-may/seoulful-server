@@ -1,4 +1,4 @@
-name: Docker Build Image and Push
+name: Docker 이미지 빌드 및 푸쉬 자동화
 
 on:
   push:
