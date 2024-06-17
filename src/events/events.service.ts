@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Events } from '@/schema/events.schema'
-import { EventDTO, EventListResponseDTO, EventDetailResponseDTO } from '@/events/events.dto'
+import { EventDTO, EventListResponseDTO, EventDetailResponseDTO, NearbyEventResponseDTO } from '@/events/events.dto'
 import type { EventsModel, IEventData } from '@/events/types/events.type'
 
 @Injectable()
@@ -108,6 +108,53 @@ export class EventsService {
       const resultData = eventListData.map((data) => new EventDTO(data))
       const result = new EventListResponseDTO(resultData, totalDataCount)
 
+      return result
+    } catch (err) {
+      if (err instanceof HttpException) throw err
+      else throw new InternalServerErrorException(err)
+    }
+  }
+
+  async getNearbyEventList(geohash: string) {
+    const incomingGeohash = geohash.split(',')
+    const queryResult: IEventData[] = []
+    const subQuery = {
+      _id: 0,
+      event_id: 1,
+      category_seq: 1,
+      event_name: 1,
+      period: 1,
+      main_img: 1,
+      start_date: 1,
+      end_date: 1,
+      detail_url: 1,
+      geohash: 1
+    }
+
+    if (incomingGeohash.length === 1 && !incomingGeohash[0]) throw new BadRequestException('geohash가 없습니다.')
+    if (incomingGeohash.length > 9) throw new BadRequestException('검색가능한 geohash의 지역은 최대 9개입니다.')
+
+    try {
+      for (const geohash of incomingGeohash) {
+        if (geohash.length > 6) throw new BadRequestException('유효하지 않은 geohash범위입니다.')
+        const query = {
+          geohash: { $regex: geohash, $options: 'i' }
+        }
+        const eventListData: IEventData[] = await this.eventsModel.find(query, subQuery).exec()
+        queryResult.push(...eventListData)
+      }
+
+      const resultData = incomingGeohash.reduce(
+        (acc, geohash) => {
+          const includedGeohashData = queryResult.filter((data) => data.geohash.includes(geohash))
+          const eventDtoData = includedGeohashData.map((data) => new EventDTO(data))
+          acc[geohash] = eventDtoData
+          return acc
+        },
+        {} as Record<string, EventDTO[]>
+      )
+
+      const result = new NearbyEventResponseDTO(resultData)
       return result
     } catch (err) {
       if (err instanceof HttpException) throw err
