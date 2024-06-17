@@ -70,3 +70,10 @@ export class EventDetailResponseDTO {
     this.data = data
   }
 }
+
+export class NearbyEventResponseDTO {
+  data: Record<string, EventDTO[]>
+  constructor(data: Record<string, EventDTO[]>) {
+    this.data = data
+  }
+}
