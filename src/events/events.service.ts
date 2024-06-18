@@ -154,6 +154,8 @@ export class EventsService {
         {} as Record<string, EventDTO[]>
       )
 
+      queryResult.length = 0
+
       const result = new NearbyEventResponseDTO(resultData)
       return result
     } catch (err) {
