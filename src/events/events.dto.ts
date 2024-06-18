@@ -24,6 +24,7 @@ export class EventDTO {
   longitude: number
   isFree: boolean
   detailUrl: string
+  geohash: string
 
   constructor(data: IEventData) {
     this.eventId = data.event_id
@@ -49,6 +50,7 @@ export class EventDTO {
     this.longitude = data.longitude
     this.isFree = data.is_free
     this.detailUrl = data.detail_url
+    this.geohash = data.geohash
   }
 }
 
@@ -65,6 +67,13 @@ export class EventListResponseDTO {
 export class EventDetailResponseDTO {
   data: EventDTO
   constructor(data: EventDTO) {
+    this.data = data
+  }
+}
+
+export class NearbyEventResponseDTO {
+  data: Record<string, EventDTO[]>
+  constructor(data: Record<string, EventDTO[]>) {
     this.data = data
   }
 }

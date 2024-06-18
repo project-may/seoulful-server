@@ -48,4 +48,11 @@ export class EventsController {
     const result = this.eventsService.getEventDetail(eventId)
     return result
   }
+
+  @Get('/nearby')
+  @HttpCode(HttpStatus.OK)
+  getNearbyEventList(@Query('geohash') geohash: string) {
+    const result = this.eventsService.getNearbyEventList(geohash)
+    return result
+  }
 }

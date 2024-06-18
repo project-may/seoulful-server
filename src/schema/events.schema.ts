@@ -74,6 +74,9 @@ export class Events extends Document {
 
   @Prop({ type: String, required: true })
   detail_url: string
+
+  @Prop({ type: String, required: true })
+  geohash: string
 }
 
 export const EventsSchema = SchemaFactory.createForClass(Events)

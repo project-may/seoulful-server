@@ -25,6 +25,7 @@ export interface IEventData {
   longitude: number
   is_free: boolean
   detail_url: string
+  geohash: string
 }
 
 export type EventsModel = Model<IEventData>
