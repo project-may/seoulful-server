@@ -22,21 +22,24 @@ export class EventsService {
       if (categorySeq && Number.isNaN(Number(categorySeq)))
         throw new BadRequestException('유효하지 않은 카테고리입니다.')
 
+      const query = {
+        ...(categorySeq && { category_seq: categorySeq })
+      }
+
+      const subQuery = {
+        _id: 0,
+        event_id: 1,
+        category_seq: 1,
+        event_name: 1,
+        period: 1,
+        main_img: 1,
+        start_date: 1,
+        end_date: 1,
+        detail_url: 1
+      }
+
       const eventListData: IEventData[] = await this.eventsModel
-        .find(
-          { ...(categorySeq && { category_seq: categorySeq }) },
-          {
-            _id: 0,
-            event_id: 1,
-            category_seq: 1,
-            event_name: 1,
-            period: 1,
-            main_img: 1,
-            start_date: 1,
-            end_date: 1,
-            detail_url: 1
-          }
-        )
+        .find(query, subQuery)
         .limit(Number(limit))
         .skip(Number(offset))
         .exec()
@@ -76,8 +79,8 @@ export class EventsService {
     limit: string,
     offset: string,
     eventName: string,
-    startDate: string,
-    endDate: string,
+    startDate?: string,
+    endDate?: string,
     categorySeq?: number,
     guSeq?: number
   ) {
@@ -86,20 +89,33 @@ export class EventsService {
       if (Number.isNaN(Number(limit)) || Number.isNaN(Number(offset)))
         throw new BadRequestException('유효하지 않은 limit 혹은 offset 값입니다.')
       if (!eventName) throw new BadRequestException('검색어가 없습니다.')
-      if (!startDate || !endDate) throw new BadRequestException('시작일 또는 종료일이 없습니다.')
+      if (new Date(startDate) > new Date(endDate))
+        throw new BadRequestException('시작일자가 종료일자보다 늦을 수 없습니다.')
       if (categorySeq && Number.isNaN(categorySeq)) throw new BadRequestException('유효하지 않은 카테고리입니다.')
       if (guSeq && Number.isNaN(guSeq)) throw new BadRequestException('유효하지 않은 지역입니다.')
 
       const query = {
         event_name: { $regex: eventName, $options: 'i' },
-        start_date: { $gte: startDate },
-        end_date: { $lte: endDate },
+        ...(startDate && { start_date: { $gte: startDate } }),
+        ...(endDate && { end_date: { $lte: endDate } }),
         ...(categorySeq && { category_seq: categorySeq }),
         ...(guSeq && { gu_seq: guSeq })
       }
 
+      const subQuery = {
+        _id: 0,
+        event_id: 1,
+        category_seq: 1,
+        event_name: 1,
+        period: 1,
+        main_img: 1,
+        start_date: 1,
+        end_date: 1,
+        detail_url: 1
+      }
+
       const eventListData: IEventData[] = await this.eventsModel
-        .find(query)
+        .find(query, subQuery)
         .limit(Number(limit))
         .skip(Number(offset))
         .exec()
