@@ -27,7 +27,7 @@ export class Log extends Document {
   @Prop({ type: String, required: true })
   original_url: string
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, default: 'unknown-host' })
   hostname: string
 
   @Prop({ type: Object, required: true })
