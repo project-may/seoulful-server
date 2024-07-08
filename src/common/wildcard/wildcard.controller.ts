@@ -1,14 +1,15 @@
-import { Controller, All, Req, Res } from '@nestjs/common'
-import { Request, Response } from 'express'
+import { Controller, All, Req, UseFilters, HttpStatus, HttpException } from '@nestjs/common'
+import { Request } from 'express'
+import { HttpExceptionFilter } from '@/common/filters/http-exception.filter'
 
 @Controller('*')
+@UseFilters(HttpExceptionFilter)
 export class WildcardController {
   @All()
-  wildcardHandler(@Req() request: Request, @Res() response: Response) {
-    response
-      .status(418)
-      .send(
-        `👋 Oops! This route does not exist.\n\nYou tried to ${request.method} ${request.path}, but I'm just a teapot 🫖.\n\nPlease stop trying to access unauthorized routes. Your activity has been logged.`
-      )
+  wildcardHandler(@Req() request: Request) {
+    throw new HttpException(
+      `👋 Oops! This route does not exist.\n\nYou tried to ${request.method} ${request.path}, but I'm just a teapot 🫖.\n\nPlease stop trying to access unauthorized routes. Your activity has been logged.`,
+      HttpStatus.I_AM_A_TEAPOT
+    )
   }
 }
