@@ -1,14 +1,15 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { APP_FILTER } from '@nestjs/core'
 import { AppController } from '@/app.controller'
 import { AppService } from '@/app.service'
 import { EventsModule } from '@/events/events.module'
 import { AuthModule } from '@/auth/auth.module'
 import { Log, LogSchema } from '@/schema/logs.schema'
-import { LoggingMiddleware } from '@/middleware/loggin.middleware'
-import { APP_FILTER } from '@nestjs/core'
-import { HttpExceptionFilter } from './common/filters/http-exception.filter'
+import { LoggingMiddleware } from '@/middleware/logging.middleware'
+import { HttpExceptionFilter } from '@/common/filters/http-exception.filter'
+import { WildcardModule } from '@/common/wildcard/wildcard.module'
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter'
     }),
     MongooseModule.forFeature([{ name: Log.name, schema: LogSchema }]),
     EventsModule,
-    AuthModule
+    AuthModule,
+    WildcardModule
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_FILTER, useClass: HttpExceptionFilter }]
