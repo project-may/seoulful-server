@@ -1,5 +1,17 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common'
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards
+} from '@nestjs/common'
 import { AuthService } from '@/auth/auth.service'
+import { JwtAuthGuard } from '@/common/jwt/jwt-auth.guard'
 
 @Controller('auth')
 export class AuthController {
@@ -25,6 +37,7 @@ export class AuthController {
 
   @Get('/user/:userId')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   getUserDetail(@Param('userId') userId: string, @Query('provider') provider: 'kakao' | 'naver') {
     return this.authService.getUserDetail(userId, provider)
   }
