@@ -18,8 +18,8 @@ export class UserDTO {
     this.email = userData.email
     this.profileImg = userData.profile_img
     this.bookmarkList = userData.bookmark_list
-    this.accessToken = userData.access_token
-    this.refreshToken = userData.refresh_token
+    this.accessToken = userData.user_access_token
+    this.refreshToken = userData.user_refresh_token
     this.createdAt = userData.created_at
   }
 }
