@@ -30,6 +30,12 @@ export class User extends Document {
 
   @Prop({ type: Date, default: new Date() })
   created_at: Date
+
+  @Prop({ type: String, default: null })
+  user_access_token: string | null
+
+  @Prop({ type: String, default: null })
+  user_refresh_token: string | null
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

@@ -11,4 +11,6 @@ export interface IUserData {
   access_token: string | null
   refresh_token: string | null
   created_at: Date
+  user_access_token: string | null
+  user_refresh_token: string | null
 }
