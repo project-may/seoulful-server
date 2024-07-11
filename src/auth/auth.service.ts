@@ -5,6 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
 import { InjectModel } from '@nestjs/mongoose'
 import { ConfigService } from '@nestjs/config'
 import axios, { isAxiosError } from 'axios'
@@ -18,8 +19,18 @@ import type { IUserData } from '@/auth/types/user.types'
 export class AuthService {
   constructor(
     private configService: ConfigService,
-    @InjectModel(User.name) private readonly userModel: UserModel
+    @InjectModel(User.name) private readonly userModel: UserModel,
+    private readonly jwtService: JwtService
   ) {}
+
+  async generateJwtToken(user: IUserData) {
+    const payload = { userId: user.user_id, objId: user._id }
+
+    const userAccessToken = this.jwtService.sign(payload, { expiresIn: '15m' })
+    const userRefreshToken = this.jwtService.sign(payload, { expiresIn: '7d' })
+
+    return { userAccessToken, userRefreshToken }
+  }
 
   async saveUser(
     user: KakaoUserInfoResponse | NaverUserInfoResponse,
@@ -42,7 +53,14 @@ export class AuthService {
         user_id: String(user.id),
         login_method: 'kakao'
       })
-      return savedKakaoUser
+      const { userAccessToken, userRefreshToken } = await this.generateJwtToken(savedKakaoUser)
+      const kakaoUserWithToken: IUserData = await this.userModel.findOneAndUpdate(
+        { user_id: String(user.id), login_method: 'kakao' },
+        { userAccessToken, userRefreshToken },
+        { new: true }
+      )
+
+      return kakaoUserWithToken
     } else {
       const userDataFromNaver = {
         user_id: user.response.id,
@@ -59,7 +77,14 @@ export class AuthService {
         user_id: user.response.id,
         login_method: 'naver'
       })
-      return savedNaverUser
+      const { userAccessToken, userRefreshToken } = await this.generateJwtToken(savedNaverUser)
+
+      const naverUserWithToken: IUserData = await this.userModel.findOneAndUpdate(
+        { user_id: String(user.response.id), login_method: 'naver' },
+        { userAccessToken, userRefreshToken },
+        { new: true }
+      )
+      return naverUserWithToken
     }
   }
 
@@ -76,7 +101,13 @@ export class AuthService {
         const result = new UserResponseDTO(userDto)
         return result
       } else {
-        const userDto = new UserDTO(userData)
+        const { userAccessToken, userRefreshToken } = await this.generateJwtToken(userData)
+        const kakaoUser: IUserData = await this.userModel.findOneAndUpdate(
+          { user_id: String(user.id) },
+          { user_access_token: userAccessToken, user_refresh_token: userRefreshToken },
+          { new: true }
+        )
+        const userDto = new UserDTO(kakaoUser)
         const result = new UserResponseDTO(userDto)
         return result
       }
@@ -88,7 +119,13 @@ export class AuthService {
         const result = new UserResponseDTO(userDto)
         return result
       } else {
-        const userDto = new UserDTO(userData)
+        const { userAccessToken, userRefreshToken } = await this.generateJwtToken(userData)
+        const naverUser: IUserData = await this.userModel.findOneAndUpdate(
+          { user_id: user.response.id },
+          { user_access_token: userAccessToken, user_refresh_token: userRefreshToken },
+          { new: true }
+        )
+        const userDto = new UserDTO(naverUser)
         const result = new UserResponseDTO(userDto)
         return result
       }
@@ -105,8 +142,7 @@ export class AuthService {
     const payload = {
       grant_type: 'authorization_code',
       client_id: clientId,
-      // TODO: redirect_uri논의 필요 및 환경변수 화
-      redirect_uri: 'http://localhost:5173/users/signin/kakao',
+      redirect_uri: this.configService.get<string>('KAKAO_REDIRECT_URI'),
       code: authCode
     }
     try {
@@ -217,6 +253,9 @@ export class AuthService {
 
       return result
     } catch (err) {
+      if (err instanceof NotFoundException || err instanceof BadRequestException) {
+        throw err
+      }
       throw new InternalServerErrorException(err)
     }
   }
