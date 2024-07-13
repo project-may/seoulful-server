@@ -11,7 +11,7 @@ export class BookmarkService {
     return `userId: GET ${userId}`
   }
 
-  addBookmark(userId: string) {
-    return `userId: PUT ${userId}`
+  addBookmark(userId: string, payload: { eventSeq: number }) {
+    return `userId: PUT ${userId}, eventSeq is ${payload.eventSeq}`
   }
 }
