@@ -10,6 +10,7 @@ import { Log, LogSchema } from '@/schema/logs.schema'
 import { LoggingMiddleware } from '@/middleware/logging.middleware'
 import { HttpExceptionFilter } from '@/common/filters/http-exception.filter'
 import { WildcardModule } from '@/common/wildcard/wildcard.module'
+import { BookmarkModule } from '@/bookmark/bookmark.module'
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { WildcardModule } from '@/common/wildcard/wildcard.module'
     MongooseModule.forFeature([{ name: Log.name, schema: LogSchema }]),
     EventsModule,
     AuthModule,
+    BookmarkModule,
     WildcardModule
   ],
   controllers: [AppController],
