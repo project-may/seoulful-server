@@ -1,8 +1,15 @@
-import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException
+} from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { User } from '@/schema/user.schema'
 import { Events } from '@/schema/events.schema'
 import { EventDTO, EventListResponseDTO } from '@/events/events.dto'
+import { UserDTO, UserResponseDTO } from '@/auth/user.dto'
 import type { UserModel } from '@/schema/user.schema'
 import type { EventsModel } from '@/events/types/events.type'
 import type { IUserData } from '@/auth/types/user.types'
@@ -53,7 +60,28 @@ export class BookmarkService {
     }
   }
 
-  addBookmark(userId: string, payload: { eventSeq: number }) {
-    return `userId: PUT ${userId}, eventSeq is ${payload.eventSeq}`
+  async addBookmark(userId: string, payload: { eventSeq: number }) {
+    try {
+      if (!payload || payload.eventSeq == null) throw new BadRequestException('eventSeq가 존재하지 않습니다.')
+
+      const user: IUserData = await this.userModel.findOne({ user_id: userId })
+      if (!user) throw new NotFoundException('해당 유저를 찾을 수 없습니다.')
+
+      const isExist = user.bookmark_list.includes(payload.eventSeq)
+      if (isExist) throw new BadRequestException('이미 북마크한 행사입니다.')
+
+      const updatedUser: IUserData = await this.userModel.findOneAndUpdate(
+        { user_id: userId },
+        { $push: { bookmark_list: payload.eventSeq } },
+        { new: true }
+      )
+
+      const resultUserData = new UserDTO(updatedUser)
+
+      return new UserResponseDTO(resultUserData)
+    } catch (err) {
+      if (err instanceof HttpException) throw err
+      else throw new InternalServerErrorException(err)
+    }
   }
 }
