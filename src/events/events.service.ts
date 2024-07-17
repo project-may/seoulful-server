@@ -144,6 +144,8 @@ export class EventsService {
       start_date: 1,
       end_date: 1,
       detail_url: 1,
+      latitude: 1,
+      longitude: 1,
       geohash: 1
     }
 
