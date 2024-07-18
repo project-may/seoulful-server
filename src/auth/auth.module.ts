@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { JwtModule } from '@nestjs/jwt'
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthController } from '@/auth/auth.controller'
@@ -16,8 +16,11 @@ import { JwtStrategy } from '@/common/jwt/jwt.strategy'
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET')
+      useFactory: async (configService: ConfigService): Promise<JwtModuleOptions> => ({
+        secret: configService.get('JWT_SECRET'),
+        verifyOptions: {
+          algorithms: ['HS256']
+        }
       }),
       inject: [ConfigService]
     })
