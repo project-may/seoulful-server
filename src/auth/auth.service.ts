@@ -56,7 +56,7 @@ export class AuthService {
       const { userAccessToken, userRefreshToken } = await this.generateJwtToken(savedKakaoUser)
       const kakaoUserWithToken: IUserData = await this.userModel.findOneAndUpdate(
         { user_id: String(user.id), login_method: 'kakao' },
-        { userAccessToken, userRefreshToken },
+        { user_access_token: userAccessToken, user_refresh_token: userRefreshToken },
         { new: true }
       )
 
@@ -81,7 +81,7 @@ export class AuthService {
 
       const naverUserWithToken: IUserData = await this.userModel.findOneAndUpdate(
         { user_id: String(user.response.id), login_method: 'naver' },
-        { userAccessToken, userRefreshToken },
+        { user_access_token: userAccessToken, user_refresh_token: userRefreshToken },
         { new: true }
       )
       return naverUserWithToken
