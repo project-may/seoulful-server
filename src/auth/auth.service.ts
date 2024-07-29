@@ -142,6 +142,7 @@ export class AuthService {
     const payload = {
       grant_type: 'authorization_code',
       client_id: clientId,
+      client_secret: this.configService.get<string>('KAKAO_SECRET_KEY'),
       redirect_uri: this.configService.get<string>('KAKAO_REDIRECT_URI'),
       code: authCode
     }
@@ -155,6 +156,7 @@ export class AuthService {
         if (err.response.status === 400) {
           throw new BadRequestException(err.response.data.error_description)
         }
+        // TODO: 카카오 서버 에러 메시지 처리 추가 필요
         throw new InternalServerErrorException(err.response.data)
       }
     }
