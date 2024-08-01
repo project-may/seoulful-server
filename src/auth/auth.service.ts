@@ -94,7 +94,7 @@ export class AuthService {
     refreshToken: string
   ) {
     if ('kakao_account' in user) {
-      const userData: IUserData = await this.userModel.findOne({ user_id: String(user.id) })
+      const userData: IUserData = await this.userModel.findOne({ nickname: user.kakao_account.profile.nickname })
       if (!userData) {
         const resultData = await this.saveUser(user, accessToken, refreshToken)
         const userDto = new UserDTO(resultData)
@@ -112,7 +112,7 @@ export class AuthService {
         return result
       }
     } else {
-      const userData: IUserData = await this.userModel.findOne({ user_id: user.response.id })
+      const userData: IUserData = await this.userModel.findOne({ nickname: user.response.nickname })
       if (!userData) {
         const resultData: IUserData = await this.saveUser(user, accessToken, refreshToken)
         const userDto = new UserDTO(resultData)
