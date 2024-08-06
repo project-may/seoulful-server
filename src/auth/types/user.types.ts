@@ -3,7 +3,7 @@ import type { ObjectId } from 'mongoose'
 export interface IUserData {
   _id: ObjectId
   user_id: string
-  login_method: 'naver' | 'kakao'
+  login_method: AuthProvider
   nickname: string
   email: string | null
   profile_img: string | null
@@ -14,3 +14,18 @@ export interface IUserData {
   user_access_token: string | null
   user_refresh_token: string | null
 }
+
+interface IBaseAuthRequestBody {
+  code: string
+}
+
+export interface IAuthNaverRequestBody extends IBaseAuthRequestBody {
+  state: string
+}
+
+export interface IAuthKakaoRequestBody extends IBaseAuthRequestBody {
+  redirectUrl: string
+}
+
+export type AuthProvider = 'naver' | 'kakao'
+export type AuthRequestBody = IAuthKakaoRequestBody | IAuthNaverRequestBody

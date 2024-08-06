@@ -13,7 +13,7 @@ import { User, UserModel } from '@/schema/user.schema'
 import { UserDTO, UserResponseDTO } from '@/auth/user.dto'
 import type { KakaoTokenResponse, KakaoUserInfoResponse } from '@/auth/types/auth-kakao.types'
 import type { NaverTokenResponse, NaverUserInfoResponse } from '@/auth/types/auth-naver.types'
-import type { IUserData } from '@/auth/types/user.types'
+import type { IAuthKakaoRequestBody, IAuthNaverRequestBody, IUserData } from '@/auth/types/user.types'
 
 @Injectable()
 export class AuthService {
@@ -49,14 +49,14 @@ export class AuthService {
       }
       const newUser = new this.userModel(userDataFromKakao)
       await newUser.save()
-      const savedKakaoUser: IUserData = await this.userModel.findOne({
+      const savedKakaoUser = await this.userModel.findOne<IUserData>({
         user_id: String(user.id),
         login_method: 'kakao'
-      })
+      } satisfies Partial<IUserData>)
       const { userAccessToken, userRefreshToken } = await this.generateJwtToken(savedKakaoUser)
-      const kakaoUserWithToken: IUserData = await this.userModel.findOneAndUpdate(
-        { user_id: String(user.id), login_method: 'kakao' },
-        { user_access_token: userAccessToken, user_refresh_token: userRefreshToken },
+      const kakaoUserWithToken = await this.userModel.findOneAndUpdate<IUserData>(
+        { user_id: String(user.id), login_method: 'kakao' } satisfies Partial<IUserData>,
+        { user_access_token: userAccessToken, user_refresh_token: userRefreshToken } satisfies Partial<IUserData>,
         { new: true }
       )
 
@@ -73,28 +73,32 @@ export class AuthService {
       }
       const newUser = new this.userModel(userDataFromNaver)
       await newUser.save()
-      const savedNaverUser: IUserData = await this.userModel.findOne({
+      const savedNaverUser = await this.userModel.findOne<IUserData>({
         user_id: user.response.id,
         login_method: 'naver'
-      })
+      } satisfies Partial<IUserData>)
       const { userAccessToken, userRefreshToken } = await this.generateJwtToken(savedNaverUser)
 
-      const naverUserWithToken: IUserData = await this.userModel.findOneAndUpdate(
-        { user_id: String(user.response.id), login_method: 'naver' },
-        { user_access_token: userAccessToken, user_refresh_token: userRefreshToken },
+      const naverUserWithToken = await this.userModel.findOneAndUpdate<IUserData>(
+        { user_id: String(user.response.id), login_method: 'naver' } satisfies Partial<IUserData>,
+        { user_access_token: userAccessToken, user_refresh_token: userRefreshToken } satisfies Partial<IUserData>,
         { new: true }
       )
       return naverUserWithToken
     }
   }
 
+  // TODO: 액세스토큰, 리프레쉬토큰을 각 api response를 받을때 같이 생성 후 db에 저장
+  // TODO: UUID를 활용할지 아니면 _id를 활용할지 판단 필요
   async checkAndSaveUser(
     user: KakaoUserInfoResponse | NaverUserInfoResponse,
     accessToken: string,
     refreshToken: string
   ) {
     if ('kakao_account' in user) {
-      const userData: IUserData = await this.userModel.findOne({ nickname: user.kakao_account.profile.nickname })
+      const userData = await this.userModel.findOne<IUserData>({
+        nickname: user.kakao_account.profile.nickname
+      } satisfies Partial<IUserData>)
       if (!userData) {
         const resultData = await this.saveUser(user, accessToken, refreshToken)
         const userDto = new UserDTO(resultData)
@@ -102,9 +106,9 @@ export class AuthService {
         return result
       } else {
         const { userAccessToken, userRefreshToken } = await this.generateJwtToken(userData)
-        const kakaoUser: IUserData = await this.userModel.findOneAndUpdate(
-          { user_id: String(user.id) },
-          { user_access_token: userAccessToken, user_refresh_token: userRefreshToken },
+        const kakaoUser = await this.userModel.findOneAndUpdate<IUserData>(
+          { nickname: user.kakao_account.profile.nickname, login_method: 'kakao' } satisfies Partial<IUserData>,
+          { user_access_token: userAccessToken, user_refresh_token: userRefreshToken } satisfies Partial<IUserData>,
           { new: true }
         )
         const userDto = new UserDTO(kakaoUser)
@@ -112,7 +116,9 @@ export class AuthService {
         return result
       }
     } else {
-      const userData: IUserData = await this.userModel.findOne({ nickname: user.response.nickname })
+      const userData = await this.userModel.findOne<IUserData>({
+        nickname: user.response.nickname
+      } satisfies Partial<IUserData>)
       if (!userData) {
         const resultData: IUserData = await this.saveUser(user, accessToken, refreshToken)
         const userDto = new UserDTO(resultData)
@@ -120,9 +126,9 @@ export class AuthService {
         return result
       } else {
         const { userAccessToken, userRefreshToken } = await this.generateJwtToken(userData)
-        const naverUser: IUserData = await this.userModel.findOneAndUpdate(
-          { user_id: user.response.id },
-          { user_access_token: userAccessToken, user_refresh_token: userRefreshToken },
+        const naverUser = await this.userModel.findOneAndUpdate<IUserData>(
+          { nickname: user.response.nickname, login_method: 'naver' } satisfies Partial<IUserData>,
+          { user_access_token: userAccessToken, user_refresh_token: userRefreshToken } satisfies Partial<IUserData>,
           { new: true }
         )
         const userDto = new UserDTO(naverUser)
@@ -132,18 +138,20 @@ export class AuthService {
     }
   }
 
-  async getKakaoToken(requestBody: { code: string }) {
+  async getKakaoToken(requestBody: IAuthKakaoRequestBody) {
     if (!requestBody.code) {
       throw new BadRequestException('code 값이 없습니다.')
     }
     const kakaoTokenUrl = 'https://kauth.kakao.com/oauth/token'
     const clientId = this.configService.get<string>('KAKAO_API_KEY')
     const authCode = requestBody.code
+    const redirectUrl = requestBody.redirectUrl
+
     const payload = {
       grant_type: 'authorization_code',
       client_id: clientId,
       client_secret: this.configService.get<string>('KAKAO_SECRET_KEY'),
-      redirect_uri: this.configService.get<string>('KAKAO_REDIRECT_URI'),
+      redirect_uri: redirectUrl,
       code: authCode
     }
     try {
@@ -185,7 +193,7 @@ export class AuthService {
     }
   }
 
-  async getNaverToken(requestBody: { code: string; state: string }) {
+  async getNaverToken(requestBody: IAuthNaverRequestBody) {
     if (!requestBody.code || !requestBody.state) throw new BadRequestException('code 또는 state 값이 없습니다.')
 
     const naverTokenUrl = 'https://nid.naver.com/oauth2.0/token'
