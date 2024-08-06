@@ -14,3 +14,18 @@ export interface IUserData {
   user_access_token: string | null
   user_refresh_token: string | null
 }
+
+interface IBaseAuthRequestBody {
+  code: string
+}
+
+export interface IAuthNaverRequestBody extends IBaseAuthRequestBody {
+  state: string
+}
+
+export interface IAuthKakaoRequestBody extends IBaseAuthRequestBody {
+  redirectUrl: string
+}
+
+export type AuthProvider = 'naver' | 'kakao'
+export type AuthRequestBody = IAuthKakaoRequestBody | IAuthNaverRequestBody
