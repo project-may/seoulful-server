@@ -8,7 +8,8 @@ import {
   Param,
   Post,
   Query,
-  UseGuards
+  UseGuards,
+  Headers
 } from '@nestjs/common'
 import { AuthService } from '@/auth/auth.service'
 import { JwtAuthGuard } from '@/common/jwt/jwt-auth.guard'
@@ -41,8 +42,28 @@ export class AuthController {
   @Get('/user/:userId')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  getUserDetail(@Param('userId') userId: string, @Query('provider') provider: 'kakao' | 'naver') {
-    return this.authService.getUserDetail(userId, provider)
+  async getUserDetail(@Param('userId') userId: string, @Query('provider') provider: 'kakao' | 'naver') {
+    return await this.authService.getUserDetail(userId, provider)
+  }
+
+  @Post('/token/validate')
+  @HttpCode(HttpStatus.OK)
+  revalidateToken(@Headers('authorization') authorization: string) {
+    if (!authorization) throw new BadRequestException('Token is invalid')
+    const accessToken = authorization.split('Bearer')[1].trim()
+    const result = this.authService.validateToken(accessToken)
+
+    return result
+  }
+
+  @Post('/token/reissue')
+  @HttpCode(HttpStatus.OK)
+  async reissueToken(@Headers('authorization') authorization: string) {
+    if (!authorization) throw new BadRequestException('Token is invalid')
+    const refreshToken = authorization.split('Bearer')[1].trim()
+    const result = await this.authService.reissueToken(refreshToken)
+
+    return result
   }
 
   // TODO: Logout 각 api별로 구현해야함

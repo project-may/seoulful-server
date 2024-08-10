@@ -15,6 +15,11 @@ export interface IUserData {
   user_refresh_token: string | null
 }
 
+export interface IAuthJwtPayload {
+  userId: IUserData['user_id']
+  objId: IUserData['_id']
+}
+
 interface IBaseAuthRequestBody {
   code: string
 }
