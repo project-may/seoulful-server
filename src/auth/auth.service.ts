@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
+import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt'
 import { InjectModel } from '@nestjs/mongoose'
 import { ConfigService } from '@nestjs/config'
 import axios, { isAxiosError } from 'axios'
@@ -13,7 +13,7 @@ import { User, UserModel } from '@/schema/user.schema'
 import { UserDTO, UserResponseDTO } from '@/auth/user.dto'
 import type { KakaoTokenResponse, KakaoUserInfoResponse } from '@/auth/types/auth-kakao.types'
 import type { NaverTokenResponse, NaverUserInfoResponse } from '@/auth/types/auth-naver.types'
-import type { IAuthKakaoRequestBody, IAuthNaverRequestBody, IUserData } from '@/auth/types/user.types'
+import type { IAuthJwtPayload, IAuthKakaoRequestBody, IAuthNaverRequestBody, IUserData } from '@/auth/types/user.types'
 
 @Injectable()
 export class AuthService {
@@ -23,8 +23,58 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
+  validateToken(accessToken: string) {
+    if (!accessToken) throw new BadRequestException('토큰 값이 없습니다.')
+    try {
+      this.jwtService.verify<IAuthJwtPayload>(accessToken)
+      return
+    } catch (err) {
+      if (err instanceof TokenExpiredError) {
+        throw new UnauthorizedException('토큰이 만료되었습니다.')
+      }
+      if (err instanceof JsonWebTokenError) {
+        throw new UnauthorizedException('유효하지 않은 토큰입니다.')
+      }
+      throw new InternalServerErrorException(err)
+    }
+  }
+
+  async reissueToken(refreshToken: string) {
+    if (!refreshToken) throw new BadRequestException('토큰 값이 없습니다.')
+    try {
+      const decoded = await this.jwtService.verifyAsync<IAuthJwtPayload>(refreshToken)
+      const { userId, objId } = decoded
+      const user = await this.userModel.findOne<IUserData>({ user_id: userId, _id: objId } satisfies Partial<IUserData>)
+
+      if (!user) {
+        throw new NotFoundException('존재하지 않는 유저입니다.')
+      }
+
+      const { userAccessToken } = await this.generateJwtToken(user)
+
+      const updatedUser = await this.userModel.findOneAndUpdate<IUserData>(
+        { user_id: userId, _id: objId } satisfies Partial<IUserData>,
+        { user_access_token: userAccessToken } satisfies Partial<IUserData>,
+        { new: true }
+      )
+
+      const userDto = new UserDTO(updatedUser)
+      const response = new UserResponseDTO(userDto)
+
+      return response
+    } catch (err) {
+      if (err instanceof TokenExpiredError) {
+        throw new UnauthorizedException('토큰이 만료되었습니다.')
+      }
+      if (err instanceof JsonWebTokenError) {
+        throw new UnauthorizedException('유효하지 않은 토큰입니다.')
+      }
+      throw new InternalServerErrorException(err)
+    }
+  }
+
   async generateJwtToken(user: IUserData) {
-    const payload = { userId: user.user_id, objId: user._id }
+    const payload: IAuthJwtPayload = { userId: user.user_id, objId: user._id }
 
     const userAccessToken = this.jwtService.sign(payload, { expiresIn: '15m' })
     const userRefreshToken = this.jwtService.sign(payload, { expiresIn: '7d' })
