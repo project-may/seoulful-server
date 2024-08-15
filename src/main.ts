@@ -10,7 +10,7 @@ async function bootstrap() {
   // TODO: CSP 대응 필요
   app.enableCors({
     origin: [appUrl, appUrlLocal],
-    methods: ['GET', 'HEAD', 'POST', 'OPTIONS'],
+    methods: ['GET', 'HEAD', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
     credentials: true
   })
