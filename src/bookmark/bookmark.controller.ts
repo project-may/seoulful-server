@@ -1,4 +1,4 @@
-import { UseGuards, Controller, Get, Param, Put, HttpStatus, HttpCode, Body } from '@nestjs/common'
+import { UseGuards, Controller, Get, Param, Put, HttpStatus, HttpCode, Body, Delete } from '@nestjs/common'
 import { JwtAuthGuard } from '@/common/jwt/jwt-auth.guard'
 import { BookmarkService } from '@/bookmark/bookmark.service'
 
@@ -15,7 +15,13 @@ export class BookmarkController {
 
   @Put('/:userId')
   @HttpCode(HttpStatus.OK)
-  addBookmark(@Param('userId') userId: string, @Body() body: { eventSeq: number }) {
+  addBookmark(@Param('userId') userId: string, @Body() body?: { eventSeq?: number }) {
     return this.bookmarkService.addBookmark(userId, body)
+  }
+
+  @Delete('/:userId')
+  @HttpCode(HttpStatus.OK)
+  deleteBookmark(@Param('userId') userId: string, @Body() body?: { eventSeq?: number }) {
+    return this.bookmarkService.deleteBookmark(userId, body)
   }
 }
