@@ -20,7 +20,7 @@ export class BookmarkController {
   }
 
   @Delete('/:userId')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   deleteBookmark(@Param('userId') userId: string, @Body() body?: { eventSeq?: number }) {
     return this.bookmarkService.deleteBookmark(userId, body)
   }
