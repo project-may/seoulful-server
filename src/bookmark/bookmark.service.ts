@@ -67,9 +67,8 @@ export class BookmarkService {
       const user: IUserData = await this.userModel.findOne({ user_id: userId })
       if (!user) throw new NotFoundException('해당 유저를 찾을 수 없습니다.')
 
-      // TODO: 클릭으로 북마크를 추가하고 삭제하는 경우라면 아래 로직이 필요 없을 듯함
-      // const isExist = user.bookmark_list.includes(payload.eventSeq)
-      // if (isExist) throw new BadRequestException('이미 북마크한 행사입니다.')
+      const isExist = user.bookmark_list.includes(payload.eventSeq)
+      if (isExist) throw new BadRequestException('이미 북마크한 행사입니다.')
 
       const updatedUser: IUserData = await this.userModel.findOneAndUpdate(
         { user_id: userId },
