@@ -60,7 +60,33 @@ export class BookmarkService {
     }
   }
 
-  async addBookmark(userId: string, payload: { eventSeq: number }) {
+  async addBookmark(userId: string, payload?: { eventSeq?: number }) {
+    try {
+      if (!payload || payload.eventSeq == null) throw new BadRequestException('eventSeq가 존재하지 않습니다.')
+
+      const user: IUserData = await this.userModel.findOne({ user_id: userId })
+      if (!user) throw new NotFoundException('해당 유저를 찾을 수 없습니다.')
+
+      // TODO: 클릭으로 북마크를 추가하고 삭제하는 경우라면 아래 로직이 필요 없을 듯함
+      // const isExist = user.bookmark_list.includes(payload.eventSeq)
+      // if (isExist) throw new BadRequestException('이미 북마크한 행사입니다.')
+
+      const updatedUser: IUserData = await this.userModel.findOneAndUpdate(
+        { user_id: userId },
+        { $push: { bookmark_list: payload.eventSeq } },
+        { new: true, projection: { _id: 0, bookmark_list: 1 } }
+      )
+
+      const resultUserData = new UserDTO(updatedUser)
+
+      return new UserResponseDTO(resultUserData)
+    } catch (err) {
+      if (err instanceof HttpException) throw err
+      else throw new InternalServerErrorException(err)
+    }
+  }
+
+  async deleteBookmark(userId: string, payload?: { eventSeq?: number }) {
     try {
       if (!payload || payload.eventSeq == null) throw new BadRequestException('eventSeq가 존재하지 않습니다.')
 
@@ -68,12 +94,12 @@ export class BookmarkService {
       if (!user) throw new NotFoundException('해당 유저를 찾을 수 없습니다.')
 
       const isExist = user.bookmark_list.includes(payload.eventSeq)
-      if (isExist) throw new BadRequestException('이미 북마크한 행사입니다.')
+      if (!isExist) throw new BadRequestException('북마크한 행사가 아닙니다.')
 
       const updatedUser: IUserData = await this.userModel.findOneAndUpdate(
-        { user_id: userId },
-        { $push: { bookmark_list: payload.eventSeq } },
-        { new: true }
+        { user_id: userId } satisfies Partial<IUserData>,
+        { $pull: { bookmark_list: payload.eventSeq } },
+        { new: true, projection: { _id: 0, bookmark_list: 1 } }
       )
 
       const resultUserData = new UserDTO(updatedUser)
