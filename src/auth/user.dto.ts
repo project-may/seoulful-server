@@ -1,27 +1,51 @@
+import { Type, Expose, Transform, Exclude } from 'class-transformer'
+import { format } from 'date-fns'
+import { ko } from 'date-fns/locale'
+import { Types } from 'mongoose'
+import type { ObjectId } from 'mongoose'
 import type { IUserData } from '@/auth/types/user.types'
 
-export class UserDTO {
-  userId: string
-  loginMethod: 'naver' | 'kakao'
-  nickname: string
-  email: string | null
-  profileImg: string | null
-  bookmarkList: number[]
-  accessToken: string | null
-  refreshToken: string | null
-  createdAt: Date
+export class UserDTO implements Partial<IUserData> {
+  @Type(() => Types.ObjectId)
+  @Exclude()
+  _id: ObjectId
 
-  constructor(userData: IUserData) {
-    this.userId = userData.user_id
-    this.loginMethod = userData.login_method
-    this.nickname = userData.nickname
-    this.email = userData.email
-    this.profileImg = userData.profile_img
-    this.bookmarkList = userData.bookmark_list
-    this.accessToken = userData.user_access_token
-    this.refreshToken = userData.user_refresh_token
-    this.createdAt = userData.created_at
-  }
+  @Type(() => String)
+  @Expose({ name: 'user_id' })
+  userId: string
+
+  @Type(() => String)
+  @Expose({ name: 'login_method' })
+  loginMethod: 'naver' | 'kakao'
+
+  @Type(() => String)
+  @Expose()
+  nickname: string
+
+  @Type(() => String)
+  @Expose()
+  email: string | null
+
+  @Type(() => String)
+  @Expose({ name: 'profile_img' })
+  profileImg: string | null
+
+  @Type(() => Array<number>)
+  @Expose({ name: 'bookmark_list' })
+  bookmarkList: number[]
+
+  @Type(() => String)
+  @Expose({ name: 'user_access_token' })
+  accessToken: string | null
+
+  @Type(() => String)
+  @Expose({ name: 'user_refresh_token' })
+  refreshToken: string | null
+
+  @Type(() => Date)
+  @Expose({ name: 'created_at' })
+  @Transform(({ value }) => format(value, 'yyyy.MM.dd(E) HH:mm:ss', { locale: ko }))
+  createdAt: string
 }
 
 export class UserResponseDTO {

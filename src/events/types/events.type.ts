@@ -16,10 +16,10 @@ export interface IEventData {
   etc_desc: string | null
   homepage_link: string
   main_img: string
-  reg_date: Date
+  reg_date: string // date string yyyy.MM.dd HH:mm
   is_public: boolean
-  start_date: Date
-  end_date: Date
+  start_date: string // date string yyyy.MM.dd HH:mm
+  end_date: string // date string yyyy.MM.dd HH:mm
   theme: string | null
   latitude: number
   longitude: number
