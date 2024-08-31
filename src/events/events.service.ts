@@ -6,7 +6,7 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { instanceToPlain, plainToInstance } from 'class-transformer'
+import { plainToInstance } from 'class-transformer'
 import { Events } from '@/schema/events.schema'
 import {
   EventListResponseDTO,
@@ -136,8 +136,7 @@ export class EventsService {
       const totalDataCount = await this.eventsModel.countDocuments(query).exec()
 
       const resultData = eventListData.map((data) => plainToInstance(EventListDTO, data))
-      const plainObj = { data: instanceToPlain(resultData), totalCount: totalDataCount }
-      const result = plainToInstance(EventListResponseDTO, plainObj)
+      const result = new EventListResponseDTO(resultData, totalDataCount)
 
       return result
     } catch (err) {
