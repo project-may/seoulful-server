@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { JwtModule, JwtModuleOptions } from '@nestjs/jwt'
+import { JwtModule } from '@nestjs/jwt'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AuthController } from '@/auth/auth.controller'
@@ -7,6 +7,7 @@ import { AuthService } from '@/auth/auth.service'
 import { User, UserSchema } from '@/schema/user.schema'
 import { Events, EventsSchema } from '@/schema/events.schema'
 import { JwtStrategy } from '@/common/jwt/jwt.strategy'
+import type { JwtModuleOptions } from '@nestjs/jwt'
 
 @Module({
   imports: [

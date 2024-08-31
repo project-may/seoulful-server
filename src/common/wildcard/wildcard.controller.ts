@@ -1,6 +1,6 @@
 import { Controller, All, Req, UseFilters, HttpStatus, HttpException } from '@nestjs/common'
-import { Request } from 'express'
 import { HttpExceptionFilter } from '@/common/filters/http-exception.filter'
+import type { Request } from 'express'
 
 @Controller('*')
 @UseFilters(HttpExceptionFilter)

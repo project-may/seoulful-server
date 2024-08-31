@@ -1,7 +1,8 @@
-import { Injectable, NestMiddleware, Logger } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Request, Response, NextFunction } from 'express'
 import { Log } from '@/schema/logs.schema'
+import type { NestMiddleware } from '@nestjs/common'
+import type { Request, Response, NextFunction } from 'express'
 import type { LogModel } from '@/schema/logs.schema'
 
 @Injectable()

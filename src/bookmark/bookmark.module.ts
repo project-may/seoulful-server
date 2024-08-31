@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common'
-import { JwtModule, JwtModuleOptions } from '@nestjs/jwt'
+import { JwtModule } from '@nestjs/jwt'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose'
 import { BookmarkController } from '@/bookmark/bookmark.controller'
 import { BookmarkService } from '@/bookmark/bookmark.service'
 import { User, UserSchema } from '@/schema/user.schema'
 import { Events, EventsSchema } from '@/schema/events.schema'
+import type { JwtModuleOptions } from '@nestjs/jwt'
 
 /* 
 북마크 구현
