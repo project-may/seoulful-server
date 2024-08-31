@@ -1,8 +1,12 @@
 {
-  "name": "seoulmate-server",
-  "version": "0.3.1",
-  "description": "",
-  "author": "",
+  "name": "seoulful-server",
+  "version": "0.3.2",
+  "description": "seoulful-server",
+  "author": "hjpark625",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/project-may/seoulful-server"
+  },
   "private": true,
   "license": "UNLICENSED",
   "engines": {
