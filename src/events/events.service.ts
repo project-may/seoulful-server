@@ -9,12 +9,12 @@ import { InjectModel } from '@nestjs/mongoose'
 import { instanceToPlain, plainToInstance } from 'class-transformer'
 import { Events } from '@/schema/events.schema'
 import {
-  EventDTO,
   EventListResponseDTO,
   EventDetailResponseDTO,
-  NearbyEventResponseDTO,
+  NearbyEventListResponseDTO,
   EventListDTO,
-  EventDetailDTO
+  EventDetailDTO,
+  NearbyEventListDTO
 } from '@/events/events.dto'
 import type { EventsModel, IEventData } from '@/events/types/events.type'
 
@@ -58,8 +58,8 @@ export class EventsService {
         .exec()
 
       const resultData = eventListData.map((data) => plainToInstance(EventListDTO, data))
-      const plainObj = { data: instanceToPlain(resultData), totalCount: totalDataCount }
-      const result = plainToInstance(EventListResponseDTO, plainObj)
+      const result = new EventListResponseDTO(resultData, totalDataCount)
+      console.log(result)
 
       return result
     } catch (err) {
@@ -80,8 +80,7 @@ export class EventsService {
 
       const detailData = plainToInstance(EventDetailDTO, eventDetailData)
 
-      const plainObj = { data: instanceToPlain(detailData) }
-      const result = plainToInstance(EventDetailResponseDTO, plainObj)
+      const result = new EventDetailResponseDTO(detailData)
 
       return result
     } catch (err) {
@@ -175,23 +174,24 @@ export class EventsService {
         const query = {
           geohash: { $regex: geohash, $options: 'i' }
         }
-        const eventListData: IEventData[] = await this.eventsModel.find(query, subQuery).exec()
+        const eventListData: IEventData[] = await this.eventsModel.find(query, subQuery).lean().exec()
         queryResult.push(...eventListData)
       }
 
       const resultData = incomingGeohash.reduce(
         (acc, geohash) => {
           const includedGeohashData = queryResult.filter((data) => data.geohash.includes(geohash))
-          const eventDtoData = includedGeohashData.map((data) => new EventDTO(data))
+          const eventDtoData = includedGeohashData.map((data) => plainToInstance(NearbyEventListDTO, data))
           acc[geohash] = eventDtoData
           return acc
         },
-        {} as Record<string, EventDTO[]>
+        {} as Record<string, NearbyEventListDTO[]>
       )
 
       queryResult.length = 0
 
-      const result = new NearbyEventResponseDTO(resultData)
+      const result = new NearbyEventListResponseDTO(resultData)
+
       return result
     } catch (err) {
       if (err instanceof HttpException) throw err
