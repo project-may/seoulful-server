@@ -59,7 +59,6 @@ export class EventsService {
 
       const resultData = eventListData.map((data) => plainToInstance(EventListDTO, data))
       const result = new EventListResponseDTO(resultData, totalDataCount)
-      console.log(result)
 
       return result
     } catch (err) {
