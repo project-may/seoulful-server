@@ -8,6 +8,7 @@ import {
 import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt'
 import { InjectModel } from '@nestjs/mongoose'
 import { ConfigService } from '@nestjs/config'
+import { plainToInstance } from 'class-transformer'
 import axios, { isAxiosError } from 'axios'
 import { User, UserModel } from '@/schema/user.schema'
 import { UserDTO, UserResponseDTO } from '@/auth/user.dto'
@@ -58,7 +59,7 @@ export class AuthService {
         { new: true }
       )
 
-      const userDto = new UserDTO(updatedUser)
+      const userDto = plainToInstance(UserDTO, updatedUser, { excludeExtraneousValues: true })
       const response = new UserResponseDTO(userDto)
 
       return response
@@ -146,42 +147,48 @@ export class AuthService {
     refreshToken: string
   ) {
     if ('kakao_account' in user) {
-      const userData = await this.userModel.findOne<IUserData>({
+      const userData = await this.userModel.findOne({
         nickname: user.kakao_account.profile.nickname
       } satisfies Partial<IUserData>)
+
       if (!userData) {
         const resultData = await this.saveUser(user, accessToken, refreshToken)
-        const userDto = new UserDTO(resultData)
+        const userDto = plainToInstance(UserDTO, resultData, { excludeExtraneousValues: true })
         const result = new UserResponseDTO(userDto)
         return result
       } else {
-        const { userAccessToken, userRefreshToken } = await this.generateJwtToken(userData)
-        const kakaoUser = await this.userModel.findOneAndUpdate<IUserData>(
-          { nickname: user.kakao_account.profile.nickname, login_method: 'kakao' } satisfies Partial<IUserData>,
-          { user_access_token: userAccessToken, user_refresh_token: userRefreshToken } satisfies Partial<IUserData>,
-          { new: true }
-        )
-        const userDto = new UserDTO(kakaoUser)
+        const { userAccessToken, userRefreshToken } = await this.generateJwtToken(userData.toObject() as IUserData)
+        const kakaoUser = await this.userModel
+          .findOneAndUpdate<IUserData>(
+            { nickname: user.kakao_account.profile.nickname, login_method: 'kakao' } satisfies Partial<IUserData>,
+            { user_access_token: userAccessToken, user_refresh_token: userRefreshToken } satisfies Partial<IUserData>,
+            { new: true }
+          )
+          .lean()
+        const userDto = plainToInstance(UserDTO, kakaoUser, { excludeExtraneousValues: true })
         const result = new UserResponseDTO(userDto)
         return result
       }
     } else {
-      const userData = await this.userModel.findOne<IUserData>({
+      const userData = await this.userModel.findOne({
         nickname: user.response.nickname
       } satisfies Partial<IUserData>)
+
       if (!userData) {
         const resultData: IUserData = await this.saveUser(user, accessToken, refreshToken)
-        const userDto = new UserDTO(resultData)
+        const userDto = plainToInstance(UserDTO, resultData, { excludeExtraneousValues: true })
         const result = new UserResponseDTO(userDto)
         return result
       } else {
-        const { userAccessToken, userRefreshToken } = await this.generateJwtToken(userData)
-        const naverUser = await this.userModel.findOneAndUpdate<IUserData>(
-          { nickname: user.response.nickname, login_method: 'naver' } satisfies Partial<IUserData>,
-          { user_access_token: userAccessToken, user_refresh_token: userRefreshToken } satisfies Partial<IUserData>,
-          { new: true }
-        )
-        const userDto = new UserDTO(naverUser)
+        const { userAccessToken, userRefreshToken } = await this.generateJwtToken(userData.toObject() as IUserData)
+        const naverUser = await this.userModel
+          .findOneAndUpdate(
+            { nickname: user.response.nickname, login_method: 'naver' } satisfies Partial<IUserData>,
+            { user_access_token: userAccessToken, user_refresh_token: userRefreshToken } satisfies Partial<IUserData>,
+            { new: true }
+          )
+          .lean()
+        const userDto = plainToInstance(UserDTO, naverUser, { excludeExtraneousValues: true })
         const result = new UserResponseDTO(userDto)
         return result
       }
@@ -302,13 +309,13 @@ export class AuthService {
     }
 
     try {
-      const userData: IUserData = await this.userModel.findOne({ user_id: userId, login_method: provider })
+      const userData = await this.userModel.findOne({ user_id: userId, login_method: provider }).lean().exec()
 
       if (!userData) {
         throw new NotFoundException('유저 정보를 찾을 수 없습니다.')
       }
 
-      const userDto = new UserDTO(userData)
+      const userDto = plainToInstance(UserDTO, userData, { excludeExtraneousValues: true })
       const result = new UserResponseDTO(userDto)
 
       return result

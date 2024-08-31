@@ -1,10 +1,14 @@
 {
-  "name": "seoulmate-server",
-  "version": "0.3.1",
-  "description": "",
-  "author": "",
+  "name": "seoulful-server",
+  "version": "0.3.2",
+  "description": "seoulful-server",
+  "author": "hjpark625",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/project-may/seoulful-server"
+  },
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "node": "^20.11.0"
   },
@@ -27,6 +31,8 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
     "axios": "^1.7.2",
+    "class-transformer": "^0.5.1",
+    "date-fns": "^3.6.0",
     "mongoose": "^8.4.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
