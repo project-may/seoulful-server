@@ -1,3 +1,4 @@
+import { Expose, Type } from 'class-transformer'
 import type { IEventData } from '@/events/types/events.type'
 
 export class EventDTO {
@@ -15,10 +16,10 @@ export class EventDTO {
   etcDesc: string | null
   homepageLink: string
   mainImg: string
-  regDate: Date
+  regDate: string
   isPublic: boolean
-  startDate: Date
-  endDate: Date
+  startDate: string
+  endDate: string
   theme: string | null
   latitude: number
   longitude: number
@@ -54,14 +55,48 @@ export class EventDTO {
   }
 }
 
-export class EventListResponseDTO {
-  data: EventDTO[]
-  totalCount: number
+export class EventListDTO {
+  @Type(() => Number)
+  @Expose({ name: 'event_id' })
+  eventId: number
 
-  constructor(data: EventDTO[], totalCount: number) {
-    this.data = data
-    this.totalCount = totalCount
-  }
+  @Type(() => Number)
+  @Expose({ name: 'category_seq' })
+  categorySeq: number
+
+  @Type(() => String)
+  @Expose({ name: 'event_name' })
+  eventName: string
+
+  @Type(() => String)
+  @Expose()
+  period: string
+
+  @Type(() => String)
+  @Expose({ name: 'main_img' })
+  mainImg: string
+
+  @Type(() => String)
+  @Expose({ name: 'start_date' })
+  startDate: string
+
+  @Type(() => String)
+  @Expose({ name: 'end_date' })
+  endDate: string
+
+  @Type(() => String)
+  @Expose({ name: 'detail_url' })
+  detailUrl: string
+}
+
+export class EventListResponseDTO {
+  @Type(() => EventListDTO)
+  @Expose()
+  data: EventListDTO[]
+
+  @Type(() => Number)
+  @Expose()
+  totalCount: number
 }
 
 export class EventDetailResponseDTO {

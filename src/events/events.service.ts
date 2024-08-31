@@ -6,8 +6,15 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { instanceToPlain, plainToInstance } from 'class-transformer'
 import { Events } from '@/schema/events.schema'
-import { EventDTO, EventListResponseDTO, EventDetailResponseDTO, NearbyEventResponseDTO } from '@/events/events.dto'
+import {
+  EventDTO,
+  EventListResponseDTO,
+  EventDetailResponseDTO,
+  NearbyEventResponseDTO,
+  EventListDTO
+} from '@/events/events.dto'
 import type { EventsModel, IEventData } from '@/events/types/events.type'
 
 @Injectable()
@@ -42,14 +49,16 @@ export class EventsService {
         .find(query, subQuery)
         .limit(Number(limit))
         .skip(Number(offset))
+        .lean()
         .exec()
 
       const totalDataCount = await this.eventsModel
         .countDocuments({ ...(categorySeq && { category_seq: Number(categorySeq) }) })
         .exec()
 
-      const resultData = eventListData.map((data) => new EventDTO(data))
-      const result = new EventListResponseDTO(resultData, totalDataCount)
+      const resultData = eventListData.map((data) => plainToInstance(EventListDTO, data))
+      const responseObj = { data: instanceToPlain(resultData), totalCount: totalDataCount }
+      const result = plainToInstance(EventListResponseDTO, responseObj)
 
       return result
     } catch (err) {
