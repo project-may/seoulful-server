@@ -6,14 +6,14 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { plainToInstance } from 'class-transformer'
 import { User } from '@/schema/user.schema'
 import { Events } from '@/schema/events.schema'
-import { EventDTO, EventListResponseDTO } from '@/events/events.dto'
+import { EventListDTO, EventListResponseDTO } from '@/events/events.dto'
 import { UserDTO, UserResponseDTO } from '@/auth/user.dto'
 import type { UserModel } from '@/schema/user.schema'
 import type { EventsModel } from '@/events/types/events.type'
 import type { IUserData } from '@/auth/types/user.types'
-import type { IEventData } from '@/events/types/events.type'
 
 @Injectable()
 export class BookmarkService {
@@ -46,12 +46,10 @@ export class BookmarkService {
       }
 
       const bookmarkEvents = await Promise.all(
-        user.bookmark_list.map(
-          (eventSeq) => this.eventsModel.findOne({ event_id: eventSeq }, subQuery) as Promise<IEventData>
-        )
+        user.bookmark_list.map((eventSeq) => this.eventsModel.findOne({ event_id: eventSeq }, subQuery).lean().exec())
       )
 
-      const resultData = bookmarkEvents.map((data) => new EventDTO(data))
+      const resultData = bookmarkEvents.map((data) => plainToInstance(EventListDTO, data))
 
       return new EventListResponseDTO(resultData, bookmarkCounts)
     } catch (err) {
