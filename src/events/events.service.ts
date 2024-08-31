@@ -13,7 +13,8 @@ import {
   EventListResponseDTO,
   EventDetailResponseDTO,
   NearbyEventResponseDTO,
-  EventListDTO
+  EventListDTO,
+  EventDetailDTO
 } from '@/events/events.dto'
 import type { EventsModel, IEventData } from '@/events/types/events.type'
 
@@ -57,8 +58,8 @@ export class EventsService {
         .exec()
 
       const resultData = eventListData.map((data) => plainToInstance(EventListDTO, data))
-      const responseObj = { data: instanceToPlain(resultData), totalCount: totalDataCount }
-      const result = plainToInstance(EventListResponseDTO, responseObj)
+      const plainObj = { data: instanceToPlain(resultData), totalCount: totalDataCount }
+      const result = plainToInstance(EventListResponseDTO, plainObj)
 
       return result
     } catch (err) {
@@ -71,11 +72,16 @@ export class EventsService {
     try {
       if (Number.isNaN(Number(eventId))) throw new BadRequestException('유효하지 eventSeq입니다.')
 
-      const eventDetailData: IEventData = await this.eventsModel.findOne({ event_id: Number(eventId) }).exec()
+      const eventDetailData: IEventData = await this.eventsModel
+        .findOne({ event_id: Number(eventId) })
+        .lean()
+        .exec()
       if (!eventDetailData) throw new NotFoundException('존재하지 않는 행사입니다.')
 
-      const detailData = new EventDTO(eventDetailData)
-      const result = new EventDetailResponseDTO(detailData)
+      const detailData = plainToInstance(EventDetailDTO, eventDetailData)
+
+      const plainObj = { data: instanceToPlain(detailData) }
+      const result = plainToInstance(EventDetailResponseDTO, plainObj)
 
       return result
     } catch (err) {
