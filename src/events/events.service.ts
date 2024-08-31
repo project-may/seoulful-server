@@ -133,11 +133,13 @@ export class EventsService {
         .find(query, subQuery)
         .limit(Number(limit))
         .skip(Number(offset))
+        .lean()
         .exec()
       const totalDataCount = await this.eventsModel.countDocuments(query).exec()
 
-      const resultData = eventListData.map((data) => new EventDTO(data))
-      const result = new EventListResponseDTO(resultData, totalDataCount)
+      const resultData = eventListData.map((data) => plainToInstance(EventListDTO, data))
+      const plainObj = { data: instanceToPlain(resultData), totalCount: totalDataCount }
+      const result = plainToInstance(EventListResponseDTO, plainObj)
 
       return result
     } catch (err) {
