@@ -8,7 +8,7 @@
     "url": "https://github.com/project-may/seoulful-server"
   },
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "node": "^20.11.0"
   },
