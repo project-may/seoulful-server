@@ -10,7 +10,7 @@ import { plainToInstance } from 'class-transformer'
 import { User } from '@/schema/user.schema'
 import { Events } from '@/schema/events.schema'
 import { EventListDTO, EventListResponseDTO } from '@/events/events.dto'
-import { UserDTO, UserResponseDTO } from '@/auth/user.dto'
+import { BookmarkListDTO, BookmarkListResponseDTO } from '@/bookmark/bookmark.dto'
 import type { UserModel } from '@/schema/user.schema'
 import type { EventsModel } from '@/events/types/events.type'
 import type { IUserData } from '@/auth/types/user.types'
@@ -68,15 +68,15 @@ export class BookmarkService {
       const isExist = user.bookmark_list.includes(payload.eventSeq)
       if (isExist) throw new BadRequestException('이미 북마크한 행사입니다.')
 
-      const updatedUser: IUserData = await this.userModel.findOneAndUpdate(
+      const updatedUser = await this.userModel.findOneAndUpdate(
         { user_id: userId },
         { $push: { bookmark_list: payload.eventSeq } },
         { new: true, projection: { _id: 0, bookmark_list: 1 } }
       )
 
-      const resultUserData = new UserDTO(updatedUser)
+      const resultUserData = plainToInstance(BookmarkListDTO, updatedUser.toObject(), { excludeExtraneousValues: true })
 
-      return new UserResponseDTO(resultUserData)
+      return new BookmarkListResponseDTO(resultUserData)
     } catch (err) {
       if (err instanceof HttpException) throw err
       else throw new InternalServerErrorException(err)
@@ -93,15 +93,15 @@ export class BookmarkService {
       const isExist = user.bookmark_list.includes(payload.eventSeq)
       if (!isExist) throw new BadRequestException('북마크한 행사가 아닙니다.')
 
-      const updatedUser: IUserData = await this.userModel.findOneAndUpdate(
+      const updatedUser = await this.userModel.findOneAndUpdate(
         { user_id: userId } satisfies Partial<IUserData>,
         { $pull: { bookmark_list: payload.eventSeq } },
         { new: true, projection: { _id: 0, bookmark_list: 1 } }
       )
 
-      const resultUserData = new UserDTO(updatedUser)
+      const resultUserData = plainToInstance(BookmarkListDTO, updatedUser.toObject(), { excludeExtraneousValues: true })
 
-      return new UserResponseDTO(resultUserData)
+      return new BookmarkListResponseDTO(resultUserData)
     } catch (err) {
       if (err instanceof HttpException) throw err
       else throw new InternalServerErrorException(err)
