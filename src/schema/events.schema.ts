@@ -1,11 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document, Types } from 'mongoose'
+import { Document } from 'mongoose'
 
 @Schema()
 export class Events extends Document {
-  @Prop({ type: Types.ObjectId, required: true })
-  _id: Types.ObjectId
-
   @Prop({ type: Number, required: true })
   event_id: number
 
