@@ -91,7 +91,7 @@ export class EventsService {
   async getEventListBySearch(
     limit: string,
     offset: string,
-    eventName: string,
+    eventName?: string,
     startDate?: string,
     endDate?: string,
     categorySeq?: number,
@@ -101,7 +101,6 @@ export class EventsService {
       if (!limit || !offset) throw new BadRequestException('limit 또는 offset 값이 없습니다.')
       if (Number.isNaN(Number(limit)) || Number.isNaN(Number(offset)))
         throw new BadRequestException('유효하지 않은 limit 혹은 offset 값입니다.')
-      if (!eventName) throw new BadRequestException('검색어가 없습니다.')
       if (startDate && endDate) {
         if (new Date(startDate) > new Date(endDate))
           throw new BadRequestException('시작일자가 종료일자보다 늦을 수 없습니다.')
@@ -110,9 +109,9 @@ export class EventsService {
       if (guSeq && Number.isNaN(guSeq)) throw new BadRequestException('유효하지 않은 지역입니다.')
 
       const query = {
-        event_name: { $regex: eventName, $options: 'i' },
-        ...(startDate && { start_date: { $gte: startDate } }),
-        ...(endDate && { end_date: { $lte: endDate } }),
+        ...(eventName && { event_name: { $regex: eventName, $options: 'i' } }),
+        ...(startDate && { start_date: { $gte: new Date(startDate) } }),
+        ...(endDate && { end_date: { $lte: new Date(endDate) } }),
         ...(categorySeq && { category_seq: categorySeq }),
         ...(guSeq && { gu_seq: guSeq })
       }
