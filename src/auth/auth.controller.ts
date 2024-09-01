@@ -14,6 +14,8 @@ import {
 import { AuthService } from '@/auth/auth.service'
 import { JwtAuthGuard } from '@/common/jwt/jwt-auth.guard'
 import type { AuthProvider, AuthRequestBody } from '@/auth/types/user.types'
+import type { KakaoTokenResponse, KakaoUserInfoResponse } from '@/auth/types/auth-kakao.types'
+import type { NaverTokenResponse, NaverUserInfoResponse } from '@/auth/types/auth-naver.types'
 
 @Controller('auth')
 export class AuthController {
@@ -24,15 +26,15 @@ export class AuthController {
   async getToken(@Param('provider') provider: AuthProvider, @Body() requestBody: AuthRequestBody) {
     if (provider === 'kakao') {
       if (!('redirectUrl' in requestBody)) throw new BadRequestException('redirectUrl이 누락되었습니다.')
-      const { access_token, refresh_token } = await this.authService.getKakaoToken(requestBody)
-      const kakaoUserInfo = await this.authService.getKakaoUserInfo(access_token)
+      const { access_token, refresh_token } = (await this.authService.getKakaoToken(requestBody)) as KakaoTokenResponse
+      const kakaoUserInfo = (await this.authService.getKakaoUserInfo(access_token)) as KakaoUserInfoResponse
       const result = await this.authService.checkAndSaveUser(kakaoUserInfo, access_token, refresh_token)
       return result
     }
     if (provider === 'naver') {
       if (!('state' in requestBody)) throw new BadRequestException('state가 누락되었습니다.')
-      const { access_token, refresh_token } = await this.authService.getNaverToken(requestBody)
-      const naverUserInfo = await this.authService.getNaverUserInfo(access_token)
+      const { access_token, refresh_token } = (await this.authService.getNaverToken(requestBody)) as NaverTokenResponse
+      const naverUserInfo = (await this.authService.getNaverUserInfo(access_token)) as NaverUserInfoResponse
       const result = await this.authService.checkAndSaveUser(naverUserInfo, access_token, refresh_token)
       return result
     }

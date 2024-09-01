@@ -24,7 +24,7 @@ export class BookmarkService {
 
   async getBookmarkList(userId: string) {
     try {
-      const user: IUserData = await this.userModel.findOne({ user_id: userId })
+      const user = await this.userModel.findOne<IUserData>({ user_id: userId })
       if (!user) throw new NotFoundException('해당 유저를 찾을 수 없습니다.')
 
       const bookmarkCounts = user.bookmark_list.length
@@ -62,7 +62,7 @@ export class BookmarkService {
     try {
       if (!payload || payload.eventSeq == null) throw new BadRequestException('eventSeq가 존재하지 않습니다.')
 
-      const user: IUserData = await this.userModel.findOne({ user_id: userId })
+      const user = await this.userModel.findOne<IUserData>({ user_id: userId })
       if (!user) throw new NotFoundException('해당 유저를 찾을 수 없습니다.')
 
       const isExist = user.bookmark_list.includes(payload.eventSeq)
@@ -73,6 +73,7 @@ export class BookmarkService {
         { $push: { bookmark_list: payload.eventSeq } },
         { new: true, projection: { _id: 0, bookmark_list: 1 } }
       )
+      if (!updatedUser) throw new InternalServerErrorException('북마크 추가에 실패했습니다.')
 
       const resultUserData = plainToInstance(BookmarkListDTO, updatedUser.toObject(), { excludeExtraneousValues: true })
 
@@ -87,7 +88,7 @@ export class BookmarkService {
     try {
       if (!payload || payload.eventSeq == null) throw new BadRequestException('eventSeq가 존재하지 않습니다.')
 
-      const user: IUserData = await this.userModel.findOne({ user_id: userId })
+      const user = await this.userModel.findOne<IUserData>({ user_id: userId })
       if (!user) throw new NotFoundException('해당 유저를 찾을 수 없습니다.')
 
       const isExist = user.bookmark_list.includes(payload.eventSeq)
@@ -98,6 +99,7 @@ export class BookmarkService {
         { $pull: { bookmark_list: payload.eventSeq } },
         { new: true, projection: { _id: 0, bookmark_list: 1 } }
       )
+      if (!updatedUser) throw new InternalServerErrorException('북마크 삭제에 실패했습니다.')
 
       const resultUserData = plainToInstance(BookmarkListDTO, updatedUser.toObject(), { excludeExtraneousValues: true })
 

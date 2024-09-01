@@ -1,5 +1,6 @@
-import { Exclude, Expose, Type } from 'class-transformer'
+import { Exclude, Expose, Transform, Type } from 'class-transformer'
 import { Types } from 'mongoose'
+import { format } from 'date-fns'
 import type { ObjectId } from 'mongoose'
 import type { IEventData } from '@/events/types/events.type'
 
@@ -26,10 +27,12 @@ export class EventListDTO implements Partial<IEventData> {
 
   @Type(() => String)
   @Expose({ name: 'start_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   startDate: string
 
   @Type(() => String)
   @Expose({ name: 'end_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   endDate: string
 
   @Type(() => String)
@@ -50,10 +53,7 @@ export class EventDetailDTO implements Partial<IEventData> {
   @Expose({ name: 'category_seq' })
   categorySeq: number
 
-  @Type(({ object }) => {
-    if (object.gu_seq === null) return null
-    else return Number
-  })
+  @Type(() => Number)
   @Expose({ name: 'gu_seq' })
   guSeq: number | null
 
@@ -77,31 +77,19 @@ export class EventDetailDTO implements Partial<IEventData> {
   @Expose({ name: 'use_target' })
   useTarget: string
 
-  @Type(({ object }) => {
-    if (object.ticket_price === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose({ name: 'ticket_price' })
   ticketPrice: string | null
 
-  @Type(({ object }) => {
-    if (object.player === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose()
   player: string | null
 
-  @Type(({ object }) => {
-    if (object.describe === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose()
   describe: string | null
 
-  @Type(({ object }) => {
-    if (object.etc_desc === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose({ name: 'etc_desc' })
   etcDesc: string | null
 
@@ -115,6 +103,7 @@ export class EventDetailDTO implements Partial<IEventData> {
 
   @Type(() => String)
   @Expose({ name: 'reg_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   regDate: string
 
   @Type(() => Boolean)
@@ -123,16 +112,15 @@ export class EventDetailDTO implements Partial<IEventData> {
 
   @Type(() => String)
   @Expose({ name: 'start_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   startDate: string
 
   @Type(() => String)
   @Expose({ name: 'end_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   endDate: string
 
-  @Type(({ object }) => {
-    if (object.theme === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose()
   theme: string | null
 
@@ -180,10 +168,12 @@ export class NearbyEventListDTO implements Partial<IEventData> {
 
   @Type(() => String)
   @Expose({ name: 'start_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   startDate: string
 
   @Type(() => String)
   @Expose({ name: 'end_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   endDate: string
 
   @Type(() => String)

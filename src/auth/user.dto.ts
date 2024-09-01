@@ -22,10 +22,7 @@ export class UserDTO implements Partial<IUserData> {
   @Expose()
   nickname: string
 
-  @Type(({ object }) => {
-    if (object.email === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose()
   email: string | null
 
@@ -37,17 +34,11 @@ export class UserDTO implements Partial<IUserData> {
   @Expose({ name: 'bookmark_list' })
   bookmarkList: number[]
 
-  @Type(({ object }) => {
-    if (object.user_access_token === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose({ name: 'user_access_token' })
   accessToken: string | null
 
-  @Type(({ object }) => {
-    if (object.user_refresh_token === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose({ name: 'user_refresh_token' })
   refreshToken: string | null
 
