@@ -1,5 +1,6 @@
-import { Exclude, Expose, Type } from 'class-transformer'
+import { Exclude, Expose, Transform, Type } from 'class-transformer'
 import { Types } from 'mongoose'
+import { format } from 'date-fns'
 import type { ObjectId } from 'mongoose'
 import type { IEventData } from '@/events/types/events.type'
 
@@ -26,10 +27,12 @@ export class EventListDTO implements Partial<IEventData> {
 
   @Type(() => String)
   @Expose({ name: 'start_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   startDate: string
 
   @Type(() => String)
   @Expose({ name: 'end_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   endDate: string
 
   @Type(() => String)
@@ -100,6 +103,7 @@ export class EventDetailDTO implements Partial<IEventData> {
 
   @Type(() => String)
   @Expose({ name: 'reg_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   regDate: string
 
   @Type(() => Boolean)
@@ -108,10 +112,12 @@ export class EventDetailDTO implements Partial<IEventData> {
 
   @Type(() => String)
   @Expose({ name: 'start_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   startDate: string
 
   @Type(() => String)
   @Expose({ name: 'end_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   endDate: string
 
   @Type(() => String)
@@ -162,10 +168,12 @@ export class NearbyEventListDTO implements Partial<IEventData> {
 
   @Type(() => String)
   @Expose({ name: 'start_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   startDate: string
 
   @Type(() => String)
   @Expose({ name: 'end_date' })
+  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm'))
   endDate: string
 
   @Type(() => String)
