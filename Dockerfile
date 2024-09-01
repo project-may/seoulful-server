@@ -5,8 +5,9 @@ FROM --platform=${BUILDPLATFORM} node:20.17.0-alpine AS base
 # 패키지 업데이트 및 Python3, g++, make 설치
 RUN apk update && apk add --no-cache python3 g++ make
 # 타임존 설정
-RUN cp /usr/share/zoneinfo/Asia/Seoul /etc/localtime && \
-    echo "Asia/Seoul" > /etc/timezone
+ENV TZ=Asia/Seoul
+RUN echo "${TZ}" > /etc/timezone && \
+    ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime
 
 # 패키지매니저 설치
 RUN npm install -g pnpm
