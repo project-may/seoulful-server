@@ -71,7 +71,7 @@ export class EventsService {
     try {
       if (Number.isNaN(Number(eventId))) throw new BadRequestException('유효하지 eventSeq입니다.')
 
-      const eventDetailData: IEventData = await this.eventsModel
+      const eventDetailData = await this.eventsModel
         .findOne({ event_id: Number(eventId) })
         .lean()
         .exec()
@@ -102,8 +102,10 @@ export class EventsService {
       if (Number.isNaN(Number(limit)) || Number.isNaN(Number(offset)))
         throw new BadRequestException('유효하지 않은 limit 혹은 offset 값입니다.')
       if (!eventName) throw new BadRequestException('검색어가 없습니다.')
-      if (new Date(startDate) > new Date(endDate))
-        throw new BadRequestException('시작일자가 종료일자보다 늦을 수 없습니다.')
+      if (startDate && endDate) {
+        if (new Date(startDate) > new Date(endDate))
+          throw new BadRequestException('시작일자가 종료일자보다 늦을 수 없습니다.')
+      }
       if (categorySeq && Number.isNaN(categorySeq)) throw new BadRequestException('유효하지 않은 카테고리입니다.')
       if (guSeq && Number.isNaN(guSeq)) throw new BadRequestException('유효하지 않은 지역입니다.')
 

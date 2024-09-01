@@ -50,10 +50,7 @@ export class EventDetailDTO implements Partial<IEventData> {
   @Expose({ name: 'category_seq' })
   categorySeq: number
 
-  @Type(({ object }) => {
-    if (object.gu_seq === null) return null
-    else return Number
-  })
+  @Type(() => Number)
   @Expose({ name: 'gu_seq' })
   guSeq: number | null
 
@@ -77,31 +74,19 @@ export class EventDetailDTO implements Partial<IEventData> {
   @Expose({ name: 'use_target' })
   useTarget: string
 
-  @Type(({ object }) => {
-    if (object.ticket_price === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose({ name: 'ticket_price' })
   ticketPrice: string | null
 
-  @Type(({ object }) => {
-    if (object.player === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose()
   player: string | null
 
-  @Type(({ object }) => {
-    if (object.describe === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose()
   describe: string | null
 
-  @Type(({ object }) => {
-    if (object.etc_desc === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose({ name: 'etc_desc' })
   etcDesc: string | null
 
@@ -129,10 +114,7 @@ export class EventDetailDTO implements Partial<IEventData> {
   @Expose({ name: 'end_date' })
   endDate: string
 
-  @Type(({ object }) => {
-    if (object.theme === null) return null
-    else return String
-  })
+  @Type(() => String)
   @Expose()
   theme: string | null
 

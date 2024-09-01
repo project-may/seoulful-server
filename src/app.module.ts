@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common'
+import { Module, RequestMethod } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { APP_FILTER } from '@nestjs/core'
@@ -11,6 +11,7 @@ import { LoggingMiddleware } from '@/middleware/logging.middleware'
 import { HttpExceptionFilter } from '@/common/filters/http-exception.filter'
 import { WildcardModule } from '@/common/wildcard/wildcard.module'
 import { BookmarkModule } from '@/bookmark/bookmark.module'
+import type { MiddlewareConsumer } from '@nestjs/common'
 
 @Module({
   imports: [

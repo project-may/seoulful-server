@@ -10,11 +10,12 @@ import { InjectModel } from '@nestjs/mongoose'
 import { ConfigService } from '@nestjs/config'
 import { plainToInstance } from 'class-transformer'
 import axios, { isAxiosError } from 'axios'
-import { User, UserModel } from '@/schema/user.schema'
+import { User } from '@/schema/user.schema'
 import { UserDTO, UserResponseDTO } from '@/auth/user.dto'
 import type { KakaoTokenResponse, KakaoUserInfoResponse } from '@/auth/types/auth-kakao.types'
 import type { NaverTokenResponse, NaverUserInfoResponse } from '@/auth/types/auth-naver.types'
 import type { IAuthJwtPayload, IAuthKakaoRequestBody, IAuthNaverRequestBody, IUserData } from '@/auth/types/user.types'
+import type { UserModel } from '@/schema/user.schema'
 
 @Injectable()
 export class AuthService {
@@ -104,12 +105,18 @@ export class AuthService {
         user_id: String(user.id),
         login_method: 'kakao'
       } satisfies Partial<IUserData>)
+      if (!savedKakaoUser) {
+        throw new InternalServerErrorException('유저 정보 저장에 실패했습니다.')
+      }
       const { userAccessToken, userRefreshToken } = await this.generateJwtToken(savedKakaoUser)
       const kakaoUserWithToken = await this.userModel.findOneAndUpdate<IUserData>(
         { user_id: String(user.id), login_method: 'kakao' } satisfies Partial<IUserData>,
         { user_access_token: userAccessToken, user_refresh_token: userRefreshToken } satisfies Partial<IUserData>,
         { new: true }
       )
+      if (!kakaoUserWithToken) {
+        throw new InternalServerErrorException('유저 정보 저장에 실패했습니다.')
+      }
 
       return kakaoUserWithToken
     } else {
@@ -128,6 +135,9 @@ export class AuthService {
         user_id: user.response.id,
         login_method: 'naver'
       } satisfies Partial<IUserData>)
+      if (!savedNaverUser) {
+        throw new InternalServerErrorException('유저 정보 저장에 실패했습니다.')
+      }
       const { userAccessToken, userRefreshToken } = await this.generateJwtToken(savedNaverUser)
 
       const naverUserWithToken = await this.userModel.findOneAndUpdate<IUserData>(
@@ -135,6 +145,9 @@ export class AuthService {
         { user_access_token: userAccessToken, user_refresh_token: userRefreshToken } satisfies Partial<IUserData>,
         { new: true }
       )
+      if (!naverUserWithToken) {
+        throw new InternalServerErrorException('유저 정보 저장에 실패했습니다.')
+      }
       return naverUserWithToken
     }
   }
@@ -218,11 +231,11 @@ export class AuthService {
       return data
     } catch (err) {
       if (isAxiosError(err)) {
-        if (err.response.status === 400) {
+        if (err.response?.status === 400) {
           throw new BadRequestException(err.response.data.error_description)
         }
         // TODO: 카카오 서버 에러 메시지 처리 추가 필요
-        throw new InternalServerErrorException(err.response.data)
+        throw new InternalServerErrorException(err.response?.data)
       }
     }
   }
@@ -242,10 +255,10 @@ export class AuthService {
       return data
     } catch (err) {
       if (isAxiosError(err)) {
-        if (err.response.status === 401) {
-          throw new UnauthorizedException(err.response.data)
+        if (err.response?.status === 401) {
+          throw new UnauthorizedException(err.response?.data)
         }
-        throw new InternalServerErrorException(err.response.data)
+        throw new InternalServerErrorException(err.response?.data)
       }
     }
   }
@@ -273,7 +286,7 @@ export class AuthService {
       return data
     } catch (err) {
       if (isAxiosError(err)) {
-        throw new InternalServerErrorException(err.response.data)
+        throw new InternalServerErrorException(err.response?.data)
       }
     }
   }
@@ -291,10 +304,10 @@ export class AuthService {
       return data
     } catch (err) {
       if (isAxiosError(err)) {
-        if (err.response.status === 401) {
+        if (err.response?.status === 401) {
           throw new UnauthorizedException(err.response.data)
         }
-        throw new InternalServerErrorException(err.response.data)
+        throw new InternalServerErrorException(err.response?.data)
       }
     }
   }
