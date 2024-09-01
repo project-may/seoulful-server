@@ -28,12 +28,12 @@ export class EventListDTO implements Partial<IEventData> {
 
   @Type(() => String)
   @Expose({ name: 'start_date' })
-  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm', { locale: ko }))
+  @Transform(({ value }) => format(new Date(value).toLocaleDateString('ko-kr'), 'yyyy.M.d HH:mm', { locale: ko }))
   startDate: string
 
   @Type(() => String)
   @Expose({ name: 'end_date' })
-  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm', { locale: ko }))
+  @Transform(({ value }) => format(new Date(value).toLocaleDateString('ko-kr'), 'yyyy.M.d HH:mm', { locale: ko }))
   endDate: string
 
   @Type(() => String)
@@ -104,7 +104,7 @@ export class EventDetailDTO implements Partial<IEventData> {
 
   @Type(() => String)
   @Expose({ name: 'reg_date' })
-  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm', { locale: ko }))
+  @Transform(({ value }) => format(new Date(value).toLocaleDateString('ko-kr'), 'yyyy.M.d HH:mm', { locale: ko }))
   regDate: string
 
   @Type(() => Boolean)
@@ -113,12 +113,12 @@ export class EventDetailDTO implements Partial<IEventData> {
 
   @Type(() => String)
   @Expose({ name: 'start_date' })
-  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm', { locale: ko }))
+  @Transform(({ value }) => format(new Date(value).toLocaleDateString('ko-kr'), 'yyyy.M.d HH:mm', { locale: ko }))
   startDate: string
 
   @Type(() => String)
   @Expose({ name: 'end_date' })
-  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm', { locale: ko }))
+  @Transform(({ value }) => format(new Date(value).toLocaleDateString('ko-kr'), 'yyyy.M.d HH:mm', { locale: ko }))
   endDate: string
 
   @Type(() => String)
@@ -169,12 +169,12 @@ export class NearbyEventListDTO implements Partial<IEventData> {
 
   @Type(() => String)
   @Expose({ name: 'start_date' })
-  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm', { locale: ko }))
+  @Transform(({ value }) => format(new Date(value).toLocaleDateString('ko-kr'), 'yyyy.M.d HH:mm', { locale: ko }))
   startDate: string
 
   @Type(() => String)
   @Expose({ name: 'end_date' })
-  @Transform(({ value }) => format(new Date(value), 'yyyy.M.dd HH:mm', { locale: ko }))
+  @Transform(({ value }) => format(new Date(value).toLocaleDateString('ko-kr'), 'yyyy.M.d HH:mm', { locale: ko }))
   endDate: string
 
   @Type(() => String)
