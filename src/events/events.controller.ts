@@ -23,9 +23,9 @@ export class EventsController {
   getEventListBySearch(
     @Query('limit') limit: string,
     @Query('offset') offset: string,
-    @Query('eventName') eventName: string,
-    @Query('startDate') startDate: string,
-    @Query('endDate') endDate: string,
+    @Query('eventName') eventName?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
     @Query('categorySeq') categorySeq?: number,
     @Query('guSeq') guSeq?: number
   ) {
